@@ -1,0 +1,176 @@
+{
+  "checkpoint": "HuggingFaceVLA/smolvla_libero",
+  "checkpoint_path": "<remote-home>/.cache/huggingface/hub/models--HuggingFaceVLA--smolvla_libero/snapshots/6721902bc4d61e50a3bfdb11dfb4cb626f05d102",
+  "parquet": "<remote-home>/.cache/huggingface/hub/datasets--HuggingFaceVLA--libero/snapshots/86958911c0f959db2bbbdb107eb3e17c5f9c798e/data/chunk-000/file-309.parquet",
+  "episode_index": 1272,
+  "frame_index": 0,
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "flow_steps": 10,
+  "strict_state_dict_load": true,
+  "base_vlm_weights_loaded_before_policy": false,
+  "raw_inputs": {
+    "observation.images.image": {
+      "shape": [
+        3,
+        256,
+        256
+      ],
+      "dtype": "torch.float32",
+      "device": "cpu"
+    },
+    "observation.images.image2": {
+      "shape": [
+        3,
+        256,
+        256
+      ],
+      "dtype": "torch.float32",
+      "device": "cpu"
+    },
+    "observation.state": {
+      "shape": [
+        8
+      ],
+      "dtype": "torch.float32",
+      "device": "cpu"
+    },
+    "task": {
+      "type": "str"
+    }
+  },
+  "processed_inputs": {
+    "action": {
+      "type": "NoneType"
+    },
+    "next.reward": {
+      "type": "float"
+    },
+    "next.done": {
+      "type": "bool"
+    },
+    "next.truncated": {
+      "type": "bool"
+    },
+    "info": {
+      "type": "dict"
+    },
+    "task": {
+      "type": "list"
+    },
+    "observation.images.image": {
+      "shape": [
+        1,
+        3,
+        256,
+        256
+      ],
+      "dtype": "torch.float32",
+      "device": "cuda:0"
+    },
+    "observation.images.image2": {
+      "shape": [
+        1,
+        3,
+        256,
+        256
+      ],
+      "dtype": "torch.float32",
+      "device": "cuda:0"
+    },
+    "observation.state": {
+      "shape": [
+        1,
+        8
+      ],
+      "dtype": "torch.float32",
+      "device": "cuda:0"
+    },
+    "observation.language.tokens": {
+      "shape": [
+        1,
+        20
+      ],
+      "dtype": "torch.int64",
+      "device": "cuda:0"
+    },
+    "observation.language.attention_mask": {
+      "shape": [
+        1,
+        20
+      ],
+      "dtype": "torch.bool",
+      "device": "cuda:0"
+    }
+  },
+  "output_shape": [
+    1,
+    50,
+    7
+  ],
+  "output_dtype": "torch.float32",
+  "output_device": "cuda:0",
+  "output_finite": true,
+  "load_seconds": 9.523021905999997,
+  "load_peak_gpu_bytes": 1525703168,
+  "inference_seconds": 0.519884151000042,
+  "inference_peak_gpu_bytes": 1581556736,
+  "latency_benchmarks": [
+    {
+      "flow_steps": 10,
+      "warmup_calls": 5,
+      "measured_calls": 10,
+      "mean_seconds": 0.42868065749999573,
+      "median_seconds": 0.4521805064999853,
+      "p95_seconds": 0.5625534840000341,
+      "min_seconds": 0.31327395400001024,
+      "max_seconds": 0.5625534840000341,
+      "peak_gpu_bytes": 1581556736,
+      "output_shape": [
+        1,
+        50,
+        7
+      ],
+      "output_finite": true,
+      "distilled_model": false,
+      "interpretation": "native 10-step teacher latency baseline"
+    },
+    {
+      "flow_steps": 5,
+      "warmup_calls": 5,
+      "measured_calls": 10,
+      "mean_seconds": 0.22683040419998407,
+      "median_seconds": 0.1977559425000095,
+      "p95_seconds": 0.3418812059999823,
+      "min_seconds": 0.190645682999957,
+      "max_seconds": 0.3418812059999823,
+      "peak_gpu_bytes": 1581556736,
+      "output_shape": [
+        1,
+        50,
+        7
+      ],
+      "output_finite": true,
+      "distilled_model": false,
+      "interpretation": "undistilled teacher short-step latency baseline"
+    },
+    {
+      "flow_steps": 2,
+      "warmup_calls": 5,
+      "measured_calls": 10,
+      "mean_seconds": 0.16291070109999736,
+      "median_seconds": 0.1673530600000106,
+      "p95_seconds": 0.22063809299999093,
+      "min_seconds": 0.11860618899999054,
+      "max_seconds": 0.22063809299999093,
+      "peak_gpu_bytes": 1581556736,
+      "output_shape": [
+        1,
+        50,
+        7
+      ],
+      "output_finite": true,
+      "distilled_model": false,
+      "interpretation": "undistilled teacher short-step latency baseline"
+    }
+  ]
+}

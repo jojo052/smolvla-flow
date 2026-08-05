@@ -1,0 +1,68 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+outputs/
+*.egg-info/
+.DS_Store
+
+# Local configuration, credentials, and machine-specific environment files.
+.env
+.env.*
+!.env.example
+remote.env
+machine.env
+cluster.env
+*.remote
+*.remote.env
+*.machine.env
+remote-env/
+
+# Model weights, checkpoints, and serialized tensors. Small JSON experiment
+# records under artifacts/ remain trackable.
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.bin
+artifacts/**/checkpoints/
+artifacts/**/checkpoint*/
+artifacts/**/cache/
+artifacts/**/caches/
+artifacts/**/hf_cache/
+checkpoints/
+model_checkpoints/
+**/checkpoints/
+**/model_checkpoints/
+
+# Large datasets, archives, and media generated during experiments.
+*.parquet
+*.arrow
+*.npy
+*.npz
+*.tar
+*.tar.gz
+*.zip
+*.mp4
+*.mov
+artifacts/**/datasets/
+artifacts/**/data/
+
+# LIBERO assets and Hugging Face caches.
+libero-assets/
+libero_assets/
+**/libero-assets/
+**/libero_assets/
+.cache/huggingface/
+**/.cache/huggingface/
+huggingface-cache/
+hf-cache/
+
+# Remote job and scheduler outputs.
+*.slurm
+*.sbatch
+*.pbs
+*.out
+*.err
+*.log

@@ -1,0 +1,143 @@
+{
+  "status": "completed",
+  "checkpoint": "HuggingFaceVLA/smolvla_libero",
+  "adapter": "artifacts/distillation/task0_dev50/student_2_action_expert.pt",
+  "mode": "sync",
+  "flow_steps": 2,
+  "suite": "libero_spatial",
+  "task_id": 0,
+  "episodes_requested": 5,
+  "start_seed": 0,
+  "package_root": "<remote-home>/miniconda3/envs/smolvla-flow/lib/python3.12/site-packages/libero/libero",
+  "assets_dir": "<remote-home>/.cache/libero/assets",
+  "checkpoint_path": "<remote-home>/.cache/huggingface/hub/models--HuggingFaceVLA--smolvla_libero/snapshots/6721902bc4d61e50a3bfdb11dfb4cb626f05d102",
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "adapter_parameter_count": 97420192,
+  "episodes": [
+    {
+      "mode": "sync",
+      "seed": 0,
+      "success": true,
+      "steps": 73,
+      "reward_sum": 1.0,
+      "elapsed_seconds": 18.270303412995418,
+      "effective_control_hz": 3.9955548821414806,
+      "waiting_ticks": 0,
+      "initial_warmup_seconds": null,
+      "policy_requests": 73,
+      "inference": {
+        "count": 73,
+        "mean_seconds": 0.12835916064417288,
+        "median_seconds": 0.12132865899184253,
+        "p95_seconds": 0.14877561399771366,
+        "max_seconds": 0.42496555800607894
+      },
+      "action_l2_mean": 1.2220312980466217,
+      "action_abs_mean": 0.2996750436445863,
+      "action_smoothness_mean": 0.046374911071209696,
+      "action_smoothness_max": 1.1991953253746033
+    },
+    {
+      "mode": "sync",
+      "seed": 1,
+      "success": false,
+      "steps": 280,
+      "reward_sum": 0.0,
+      "elapsed_seconds": 59.860678828990785,
+      "effective_control_hz": 4.677527977921874,
+      "waiting_ticks": 0,
+      "initial_warmup_seconds": null,
+      "policy_requests": 280,
+      "inference": {
+        "count": 280,
+        "mean_seconds": 0.12392832209620143,
+        "median_seconds": 0.12054329699458322,
+        "p95_seconds": 0.14156127600290347,
+        "max_seconds": 0.3861194329947466
+      },
+      "action_l2_mean": 0.8355874281678849,
+      "action_abs_mean": 0.19128621405409887,
+      "action_smoothness_mean": 0.11650665926819032,
+      "action_smoothness_max": 1.884026288986206
+    },
+    {
+      "mode": "sync",
+      "seed": 2,
+      "success": false,
+      "steps": 280,
+      "reward_sum": 0.0,
+      "elapsed_seconds": 61.09238321699377,
+      "effective_control_hz": 4.5832227399849375,
+      "waiting_ticks": 0,
+      "initial_warmup_seconds": null,
+      "policy_requests": 280,
+      "inference": {
+        "count": 280,
+        "mean_seconds": 0.12388091316788633,
+        "median_seconds": 0.12152633099321974,
+        "p95_seconds": 0.14328834699699655,
+        "max_seconds": 0.3197408629930578
+      },
+      "action_l2_mean": 0.8215019215820879,
+      "action_abs_mean": 0.19126596814486238,
+      "action_smoothness_mean": 0.11253717618154413,
+      "action_smoothness_max": 1.8457875847816467
+    },
+    {
+      "mode": "sync",
+      "seed": 3,
+      "success": true,
+      "steps": 75,
+      "reward_sum": 1.0,
+      "elapsed_seconds": 18.35223180700268,
+      "effective_control_hz": 4.086696418654769,
+      "waiting_ticks": 0,
+      "initial_warmup_seconds": null,
+      "policy_requests": 75,
+      "inference": {
+        "count": 75,
+        "mean_seconds": 0.12424538670612188,
+        "median_seconds": 0.12032216700026765,
+        "p95_seconds": 0.14251111799967475,
+        "max_seconds": 0.2724197520001326
+      },
+      "action_l2_mean": 1.2381797844712574,
+      "action_abs_mean": 0.3044263749431065,
+      "action_smoothness_mean": 0.04661780707969629,
+      "action_smoothness_max": 1.35791677236557
+    },
+    {
+      "mode": "sync",
+      "seed": 4,
+      "success": true,
+      "steps": 69,
+      "reward_sum": 1.0,
+      "elapsed_seconds": 17.406093434008653,
+      "effective_control_hz": 3.9641290138765606,
+      "waiting_ticks": 0,
+      "initial_warmup_seconds": null,
+      "policy_requests": 69,
+      "inference": {
+        "count": 69,
+        "mean_seconds": 0.1260652347827209,
+        "median_seconds": 0.1196064939867938,
+        "p95_seconds": 0.14590438999584876,
+        "max_seconds": 0.3385418420075439
+      },
+      "action_l2_mean": 1.2361779793632341,
+      "action_abs_mean": 0.30369495951708436,
+      "action_smoothness_mean": 0.04997364277479399,
+      "action_smoothness_max": 1.592025101184845
+    }
+  ],
+  "aggregate": {
+    "episode_count": 5,
+    "success_count": 3,
+    "success_rate": 0.6,
+    "mean_steps": 155.4,
+    "mean_reward_sum": 0.6,
+    "mean_waiting_ticks": 0.0,
+    "mean_action_smoothness": 0.07440203927508689,
+    "mean_effective_control_hz": 4.2614262065159245
+  }
+}

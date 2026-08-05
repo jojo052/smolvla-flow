@@ -1,0 +1,51 @@
+{
+  "status": "completed",
+  "checkpoint": "HuggingFaceVLA/smolvla_libero",
+  "adapter": null,
+  "mode": "sync",
+  "flow_steps": 10,
+  "suite": "libero_spatial",
+  "task_id": 0,
+  "episodes_requested": 1,
+  "start_seed": 0,
+  "package_root": "<remote-home>/miniconda3/envs/smolvla-flow/lib/python3.12/site-packages/libero/libero",
+  "assets_dir": "<remote-home>/.cache/libero/assets",
+  "checkpoint_path": "<remote-home>/.cache/huggingface/hub/models--HuggingFaceVLA--smolvla_libero/snapshots/6721902bc4d61e50a3bfdb11dfb4cb626f05d102",
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "adapter_parameter_count": 0,
+  "episodes": [
+    {
+      "mode": "sync",
+      "seed": 0,
+      "success": true,
+      "steps": 81,
+      "reward_sum": 1.0,
+      "elapsed_seconds": 39.11657254000602,
+      "effective_control_hz": 2.0707335725071054,
+      "waiting_ticks": 0,
+      "initial_warmup_seconds": null,
+      "policy_requests": 81,
+      "inference": {
+        "count": 81,
+        "mean_seconds": 0.3600861298521825,
+        "median_seconds": 0.35162358499655966,
+        "p95_seconds": 0.3752335530007258,
+        "max_seconds": 0.8404917640000349
+      },
+      "action_l2_mean": 1.3484112355862365,
+      "action_abs_mean": 0.3365633105335599,
+      "action_smoothness_mean": 0.09068335205998405,
+      "action_smoothness_max": 1.9960796236991882
+    }
+  ],
+  "aggregate": {
+    "episode_count": 1,
+    "success_count": 1,
+    "success_rate": 1.0,
+    "mean_steps": 81.0,
+    "mean_reward_sum": 1.0,
+    "mean_waiting_ticks": 0.0,
+    "mean_action_smoothness": 0.09068335205998405,
+    "mean_effective_control_hz": 2.0707335725071054
+  }
+}

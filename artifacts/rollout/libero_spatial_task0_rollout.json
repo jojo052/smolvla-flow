@@ -1,0 +1,13 @@
+{
+  "status": "blocked",
+  "checkpoint": "HuggingFaceVLA/smolvla_libero",
+  "adapter": null,
+  "mode": "sync",
+  "flow_steps": 10,
+  "suite": "libero_spatial",
+  "task_id": 0,
+  "episodes_requested": 1,
+  "start_seed": 0,
+  "error": "RuntimeError: LIBERO assets are missing. Expected <remote-home>/.cache/libero/assets with subdirectories scenes, articulated_objects, stable_scanned_objects, turbosquid_objects; missing scenes, articulated_objects, stable_scanned_objects, turbosquid_objects. Download the official lerobot/libero-assets dataset on a networked machine, copy it to this path, or pass --assets-dir.",
+  "next_action": "Provide LIBERO assets and rerun this command."
+}

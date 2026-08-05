@@ -1,0 +1,55 @@
+{
+  "status": "completed",
+  "runtime": {
+    "control_frequency_hz": 20.0,
+    "chunk_size": 50,
+    "execute_steps": 10,
+    "overlap_steps": 10,
+    "prefetch_threshold": 10,
+    "rtc_enabled": true,
+    "rtc_execution_horizon": 10,
+    "gripper_polarity": "positive_open"
+  },
+  "ticks": 70,
+  "elapsed_seconds": 3.7643165000008594,
+  "actions_emitted": 70,
+  "waiting_ticks": 0,
+  "triggered_inference_ticks": 1,
+  "queue_depth_min": 8,
+  "queue_depth_max": 49,
+  "server": {
+    "submitted": 1,
+    "completed": 1,
+    "dropped_stale": 0,
+    "busy": false,
+    "last_delay_steps": 2,
+    "last_error": null
+  },
+  "inference_events": [
+    {
+      "request_id": 1,
+      "elapsed_seconds": 0.08118212499903166,
+      "inference_delay": 0,
+      "resulting_delay": 2,
+      "queue_depth_before_merge": 8,
+      "queue_depth_at_completion": 50,
+      "deadline_miss": false,
+      "error": null
+    }
+  ],
+  "policy_calls": [
+    {
+      "observation": {
+        "frame": 40
+      },
+      "inference_delay": 0,
+      "execution_horizon": 10,
+      "previous_prefix_shape": [
+        1,
+        10,
+        7
+      ]
+    }
+  ],
+  "effective_control_hz": 18.595673344678648
+}

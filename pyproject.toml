@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=71"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smolvla-flow"
+version = "0.1.0"
+description = "Flow-matching distillation and asynchronous control experiments for SmolVLA"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=2.0,<2.3",
+  "torch>=2.7,<2.12",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.1,<9"]
+plot = ["matplotlib>=3.8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+

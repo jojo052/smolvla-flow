@@ -1,0 +1,293 @@
+{
+  "record_id": "preflight_2026-08-03_libero_spatial_task0",
+  "recorded_at": "2026-08-04",
+  "status": "async_runtime_smoke_complete",
+  "host": {
+    "path": "local control client -> GPU environment",
+    "gpu": "RTX 4090",
+    "python": "3.12.13",
+    "torch": "2.11.0+cu130",
+    "lerobot": "0.6.1"
+  },
+  "dataset": {
+    "repo_id": "HuggingFaceVLA/libero",
+    "suite": "libero_spatial",
+    "suite_task_id": 0,
+    "dataset_task_index": 34,
+    "language": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+    "episode_index": 1272,
+    "task_episode_count": 45,
+    "task_frame_count": 4487,
+    "state_dim": 8,
+    "action_dim": 7,
+    "camera_count": 2,
+    "gripper_dimension_zero_based": 6,
+    "gripper_min": -1.0,
+    "gripper_max": 1.0
+  },
+  "teacher": {
+    "checkpoint": "HuggingFaceVLA/smolvla_libero",
+    "flow_steps": 10,
+    "chunk_size": 50,
+    "strict_state_dict_load": true,
+    "base_vlm_weights_loaded_before_policy": false,
+    "output_shape": [1, 50, 7],
+    "output_finite": true,
+    "load_seconds": 9.523021905999997,
+    "inference_seconds": 0.519884151000042,
+    "load_peak_gpu_bytes": 1525703168,
+    "inference_peak_gpu_bytes": 1581556736
+  },
+  "latency_benchmark": [
+    {
+      "flow_steps": 10,
+      "warmup_calls": 5,
+      "measured_calls": 10,
+      "mean_seconds": 0.42868065749999573,
+      "median_seconds": 0.4521805064999853,
+      "p95_seconds": 0.5625534840000341,
+      "distilled_model": false,
+      "interpretation": "native 10-step teacher latency baseline"
+    },
+    {
+      "flow_steps": 5,
+      "warmup_calls": 5,
+      "measured_calls": 10,
+      "mean_seconds": 0.22683040419998407,
+      "median_seconds": 0.1977559425000095,
+      "p95_seconds": 0.3418812059999823,
+      "distilled_model": false,
+      "interpretation": "undistilled teacher short-step latency baseline"
+    },
+    {
+      "flow_steps": 2,
+      "warmup_calls": 5,
+      "measured_calls": 10,
+      "mean_seconds": 0.16291070109999736,
+      "median_seconds": 0.1673530600000106,
+      "p95_seconds": 0.22063809299999093,
+      "distilled_model": false,
+      "interpretation": "undistilled teacher short-step latency baseline"
+    },
+    {
+      "flow_steps": 2,
+      "warmup_calls": 5,
+      "measured_calls": 10,
+      "mean_seconds": 0.13477592409990394,
+      "median_seconds": 0.13046020499996303,
+      "p95_seconds": 0.15995591499995498,
+      "min_seconds": 0.11882354899989878,
+      "max_seconds": 0.15995591499995498,
+      "peak_gpu_bytes": 3109042688,
+      "output_shape": [1, 50, 7],
+      "output_finite": true,
+      "distilled_model": true,
+      "interpretation": "5-step dev student checkpoint after 10-to-5-to-2 action distillation"
+    }
+  ],
+  "distillation": {
+    "status": "completed_dev_run",
+    "checkpoint": "HuggingFaceVLA/smolvla_libero",
+    "teacher_steps": 10,
+    "progressive_stages": ["10_to_5", "5_to_2"],
+    "steps_per_stage": 5,
+    "sample_count": 8,
+    "episode_indices": [1272],
+    "action_dim": 7,
+    "internal_max_action_dim": 32,
+    "loss_action_dim": 7,
+    "chunk_size": 50,
+    "time_direction": "descending_t_1_to_0",
+    "action_space": "LeRobot normalized MEAN_STD",
+    "semantic_loss_enabled": false,
+    "teacher_frozen": true,
+    "trainable_parameter_count": 97420192,
+    "stages": [
+      {
+        "teacher_steps": 10,
+        "student_steps": 5,
+        "elapsed_seconds": 5.420000000000001,
+        "mean_step_seconds": 1.0840000000000002,
+        "peak_gpu_bytes": 4116280832,
+        "first_loss": 0.3303072452545166,
+        "last_loss": 0.26561877131462097,
+        "last_trajectory_consistency_loss": 0.005803677719086409,
+        "last_action_regression_loss": 0.2598150968551636,
+        "probe_parameter_delta_mean": 9.997904271585867e-06
+      },
+      {
+        "teacher_steps": 5,
+        "student_steps": 2,
+        "elapsed_seconds": 3.5240000000000005,
+        "mean_step_seconds": 0.7048000000000001,
+        "peak_gpu_bytes": 4240740864,
+        "first_loss": 0.31839045882225037,
+        "last_loss": 0.3221033811569214,
+        "last_trajectory_consistency_loss": 0.016297683119773865,
+        "last_action_regression_loss": 0.3058057129383087,
+        "probe_parameter_delta_mean": 9.998039786296431e-06
+      }
+    ],
+    "same_seed_action_mse": 0.08155030012130737,
+    "same_seed_action_mae": 0.19573235511779785,
+    "quality_status": "smoke_only_not_a_success_rate_evaluation"
+  },
+  "distillation_long_run": {
+    "status": "completed",
+    "checkpoint": "HuggingFaceVLA/smolvla_libero",
+    "teacher_steps": 10,
+    "progressive_stages": ["10_to_5", "5_to_2"],
+    "steps_per_stage": 50,
+    "sample_count": 9,
+    "episode_indices": [1272],
+    "sample_stride": 4,
+    "action_dim": 7,
+    "internal_max_action_dim": 32,
+    "chunk_size": 50,
+    "teacher_frozen": true,
+    "trainable_parameter_count": 97420192,
+    "stages": [
+      {
+        "teacher_steps": 10,
+        "student_steps": 5,
+        "peak_gpu_bytes": 4116280832,
+        "first_loss": 0.3303072452545166,
+        "last_loss": 0.15263210237026215,
+        "last_trajectory_consistency_loss": 0.02200898714363575,
+        "last_action_regression_loss": 0.13062311708927155
+      },
+      {
+        "teacher_steps": 5,
+        "student_steps": 2,
+        "peak_gpu_bytes": 4240740864,
+        "first_loss": 0.08120743185281754,
+        "last_loss": 0.08345713466405869,
+        "last_trajectory_consistency_loss": 0.01309145987033844,
+        "last_action_regression_loss": 0.07036567479372025
+      }
+    ],
+    "quality_status": "smoke_only_not_a_success_rate_evaluation",
+    "artifact": "artifacts/distillation/task0_dev50/distillation_metrics.json"
+  },
+  "rtc": {
+    "constructed": true,
+    "single_call_checked": true,
+    "processor_output_shape": [1, 50, 7],
+    "processor_output_finite": true,
+    "queue_remaining_after_one_get": 45,
+    "queue_first_action_shape": [7],
+    "enabled": true,
+    "execution_horizon": 10,
+    "max_guidance_weight": 10.0,
+    "prefix_attention_schedule": "EXP"
+  },
+  "async_runtime": {
+    "status": "completed_smoke",
+    "student_flow_steps": 2,
+    "control_frequency_hz": 20.0,
+    "chunk_size": 50,
+    "execute_steps": 10,
+    "overlap_steps": 10,
+    "prefetch_threshold": 10,
+    "rtc_enabled": true,
+    "rtc_execution_horizon": 10,
+    "postprocessor_enabled": true,
+    "initial_warmup_seconds": 0.4988237970010232,
+    "ticks": 120,
+    "elapsed_seconds": 6.122386536999329,
+    "actions_emitted": 120,
+    "waiting_ticks": 0,
+    "triggered_inference_ticks": 3,
+    "inference_events": [
+      {
+        "elapsed_seconds": 0.1542308360003517,
+        "inference_delay": 0,
+        "resulting_delay": 4,
+        "queue_depth_before_merge": 7,
+        "dropped_new_steps": 4,
+        "deadline_miss": false
+      },
+      {
+        "elapsed_seconds": 0.14560147100019094,
+        "inference_delay": 4,
+        "resulting_delay": 3,
+        "queue_depth_before_merge": 7,
+        "dropped_new_steps": 3,
+        "deadline_miss": false
+      },
+      {
+        "elapsed_seconds": 0.20598660199902952,
+        "inference_delay": 3,
+        "resulting_delay": 5,
+        "queue_depth_before_merge": 9,
+        "dropped_new_steps": 5,
+        "deadline_miss": false
+      }
+    ],
+    "output_shape": [1, 50, 7],
+    "gripper_polarity": "positive_open_for_smoke_only",
+    "hardware_ready": false
+  },
+  "async_runtime_long_distill": {
+    "status": "completed_smoke",
+    "student_flow_steps": 2,
+    "adapter": "artifacts/distillation/task0_dev50/student_2_action_expert.pt",
+    "control_frequency_hz": 20.0,
+    "chunk_size": 50,
+    "execute_steps": 10,
+    "overlap_steps": 10,
+    "rtc_enabled": true,
+    "rtc_execution_horizon": 10,
+    "postprocessor_enabled": true,
+    "initial_warmup_seconds": 0.4956011470003432,
+    "ticks": 120,
+    "actions_emitted": 120,
+    "waiting_ticks": 0,
+    "triggered_inference_ticks": 2,
+    "inference_events": [
+      {
+        "elapsed_seconds": 0.21384308000051533,
+        "inference_delay": 0,
+        "resulting_delay": 5,
+        "queue_depth_before_merge": 5,
+        "dropped_new_steps": 5,
+        "deadline_miss": false
+      },
+      {
+        "elapsed_seconds": 0.23071881299983943,
+        "inference_delay": 5,
+        "resulting_delay": 5,
+        "queue_depth_before_merge": 5,
+        "dropped_new_steps": 5,
+        "deadline_miss": false
+      }
+    ],
+    "artifact": "artifacts/distillation/task0_dev50/async_smolvla_smoke.json",
+    "hardware_ready": false
+  },
+  "interpretation": {
+    "control_period_seconds": 0.05,
+    "teacher_mean_latency_control_periods": 8.573613149999914,
+    "short_step_2_mean_latency_control_periods": 3.258214021999947,
+    "async_and_rtc_required_for_20hz": true,
+    "dataset_to_control_rate_interpolation_pending": true
+  },
+  "not_run": [
+    "ACT training",
+    "Diffusion Policy training",
+    "LIBERO success-rate rollout",
+    "formal multi-seed evaluation"
+  ],
+  "artifacts": [
+    "artifacts/preflight/libero_spatial_task0.json",
+    "artifacts/preflight/teacher_forward_task0.json",
+    "artifacts/preflight/teacher_contracts.json",
+    "artifacts/preflight/rtc_smoke_fixed.json",
+    "artifacts/distillation/task0_dev5_final/distillation_metrics.json",
+    "artifacts/distillation/task0_dev5_final/benchmark.json",
+    "artifacts/async_smolvla_smoke.json",
+    "artifacts/distillation/task0_dev50/distillation_metrics.json",
+    "artifacts/distillation/task0_dev50/benchmark.json",
+    "artifacts/distillation/task0_dev50/async_smolvla_smoke.json"
+  ]
+}

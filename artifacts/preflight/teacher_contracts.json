@@ -1,0 +1,49 @@
+{
+  "candidates": [
+    {
+      "repo_id": "lerobot/smolvla_libero",
+      "contract": {
+        "state_shape": [
+          6
+        ],
+        "action_shape": [
+          7
+        ],
+        "camera_count": 3,
+        "camera_keys": [
+          "observation.images.camera1",
+          "observation.images.camera2",
+          "observation.images.camera3"
+        ],
+        "policy_state_shape": [
+          6
+        ],
+        "flow_steps": 10,
+        "chunk_size": 50
+      },
+      "matches_libero_v3": false
+    },
+    {
+      "repo_id": "HuggingFaceVLA/smolvla_libero",
+      "contract": {
+        "state_shape": [
+          8
+        ],
+        "action_shape": [
+          7
+        ],
+        "camera_count": 2,
+        "camera_keys": [
+          "observation.images.image",
+          "observation.images.image2"
+        ],
+        "policy_state_shape": [
+          8
+        ],
+        "flow_steps": 10,
+        "chunk_size": 50
+      },
+      "matches_libero_v3": true
+    }
+  ]
+}

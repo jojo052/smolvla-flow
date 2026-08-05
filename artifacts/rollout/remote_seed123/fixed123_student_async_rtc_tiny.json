@@ -1,0 +1,146 @@
+{
+  "status": "completed",
+  "checkpoint": "HuggingFaceVLA/smolvla_libero",
+  "adapter": "artifacts/distillation/task0_dev50/student_2_action_expert.pt",
+  "mode": "async",
+  "flow_steps": 2,
+  "suite": "libero_spatial",
+  "task_id": 0,
+  "episodes_requested": 1,
+  "start_seed": 0,
+  "package_root": "<remote-home>/miniconda3/envs/smolvla-flow/lib/python3.12/site-packages/libero/libero",
+  "assets_dir": "<remote-home>/.cache/libero/assets",
+  "checkpoint_path": "<remote-home>/.cache/huggingface/hub/models--HuggingFaceVLA--smolvla_libero/snapshots/6721902bc4d61e50a3bfdb11dfb4cb626f05d102",
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "adapter_parameter_count": 97420192,
+  "episodes": [
+    {
+      "mode": "async",
+      "seed": 0,
+      "success": false,
+      "steps": 280,
+      "reward_sum": 0.0,
+      "elapsed_seconds": 25.407826094000484,
+      "effective_control_hz": 11.020226561851194,
+      "waiting_ticks": 0,
+      "initial_warmup_seconds": 0.4409731959894998,
+      "policy_requests": 6,
+      "inference": {
+        "count": 6,
+        "mean_seconds": 0.32140676266620477,
+        "median_seconds": 0.3163181474956218,
+        "p95_seconds": 0.43831872699956875,
+        "max_seconds": 0.43831872699956875
+      },
+      "runtime": {
+        "control_frequency_hz": 20.0,
+        "chunk_size": 50,
+        "execute_steps": 10,
+        "overlap_steps": 10,
+        "prefetch_threshold": 10,
+        "rtc_enabled": true,
+        "rtc_use_prefix": false,
+        "rtc_execution_horizon": 10,
+        "gripper_polarity": "positive_open",
+        "tick_sleep_seconds": 0.05
+      },
+      "server": {
+        "submitted": 6,
+        "completed": 6,
+        "dropped_stale": 0,
+        "busy": false,
+        "last_delay_steps": 2,
+        "last_rtc_delay_steps": 6,
+        "last_error": null
+      },
+      "inference_events": [
+        {
+          "request_id": 1,
+          "elapsed_seconds": 0.30153463999158703,
+          "inference_delay": 0,
+          "resulting_delay": 2,
+          "queue_depth_before_merge": 7,
+          "queue_depth_at_completion": 48,
+          "dropped_new_steps": 2,
+          "deadline_miss": false,
+          "error": null,
+          "wall_delay_steps": 7
+        },
+        {
+          "request_id": 2,
+          "elapsed_seconds": 0.37181079100992065,
+          "inference_delay": 7,
+          "resulting_delay": 3,
+          "queue_depth_before_merge": 6,
+          "queue_depth_at_completion": 47,
+          "dropped_new_steps": 3,
+          "deadline_miss": false,
+          "error": null,
+          "wall_delay_steps": 8
+        },
+        {
+          "request_id": 3,
+          "elapsed_seconds": 0.23170963099983055,
+          "inference_delay": 8,
+          "resulting_delay": 2,
+          "queue_depth_before_merge": 7,
+          "queue_depth_at_completion": 48,
+          "dropped_new_steps": 2,
+          "deadline_miss": false,
+          "error": null,
+          "wall_delay_steps": 5
+        },
+        {
+          "request_id": 4,
+          "elapsed_seconds": 0.43831872699956875,
+          "inference_delay": 5,
+          "resulting_delay": 3,
+          "queue_depth_before_merge": 6,
+          "queue_depth_at_completion": 47,
+          "dropped_new_steps": 3,
+          "deadline_miss": false,
+          "error": null,
+          "wall_delay_steps": 9
+        },
+        {
+          "request_id": 5,
+          "elapsed_seconds": 0.3311016549996566,
+          "inference_delay": 9,
+          "resulting_delay": 2,
+          "queue_depth_before_merge": 7,
+          "queue_depth_at_completion": 48,
+          "dropped_new_steps": 2,
+          "deadline_miss": false,
+          "error": null,
+          "wall_delay_steps": 7
+        },
+        {
+          "request_id": 6,
+          "elapsed_seconds": 0.25396513199666515,
+          "inference_delay": 7,
+          "resulting_delay": 2,
+          "queue_depth_before_merge": 7,
+          "queue_depth_at_completion": 48,
+          "dropped_new_steps": 2,
+          "deadline_miss": false,
+          "error": null,
+          "wall_delay_steps": 6
+        }
+      ],
+      "action_l2_mean": 1.1830406863948377,
+      "action_abs_mean": 0.26314299956542603,
+      "action_smoothness_mean": 0.032394260856374445,
+      "action_smoothness_max": 1.9975343346595764
+    }
+  ],
+  "aggregate": {
+    "episode_count": 1,
+    "success_count": 0,
+    "success_rate": 0.0,
+    "mean_steps": 280.0,
+    "mean_reward_sum": 0.0,
+    "mean_waiting_ticks": 0.0,
+    "mean_action_smoothness": 0.032394260856374445,
+    "mean_effective_control_hz": 11.020226561851194
+  }
+}

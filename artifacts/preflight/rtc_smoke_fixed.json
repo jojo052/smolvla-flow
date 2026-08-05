@@ -1,0 +1,22 @@
+{
+  "constructed": true,
+  "single_call_checked": true,
+  "class": "lerobot.policies.rtc.modeling_rtc.RTCProcessor",
+  "signature": "(rtc_config: lerobot.policies.rtc.configuration_rtc.RTCConfig)",
+  "processor_output_shape": [
+    1,
+    50,
+    7
+  ],
+  "processor_output_finite": true,
+  "queue_remaining_after_one_get": 45,
+  "queue_first_action_shape": [
+    7
+  ],
+  "config": {
+    "enabled": true,
+    "execution_horizon": 10,
+    "max_guidance_weight": 10.0,
+    "prefix_attention_schedule": "EXP"
+  }
+}

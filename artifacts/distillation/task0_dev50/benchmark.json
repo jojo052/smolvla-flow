@@ -1,0 +1,56 @@
+{
+  "checkpoint": "HuggingFaceVLA/smolvla_libero",
+  "adapter": "artifacts/distillation/task0_dev50/student_2_action_expert.pt",
+  "parquet": "<remote-home>/.cache/huggingface/hub/datasets--HuggingFaceVLA--libero/snapshots/86958911c0f959db2bbbdb107eb3e17c5f9c798e/data/chunk-000/file-309.parquet",
+  "episode_index": 1272,
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "teacher_flow_steps": 10,
+  "student_flow_steps": 2,
+  "teacher": {
+    "warmup": 5,
+    "repeats": 10,
+    "mean_seconds": 0.40811165630002505,
+    "median_seconds": 0.4002047740004855,
+    "min_seconds": 0.357605096000043,
+    "max_seconds": 0.4618694170003437,
+    "p95_seconds": 0.4618694170003437,
+    "output_shape": [
+      1,
+      50,
+      7
+    ],
+    "output_finite": true,
+    "peak_gpu_bytes": 3109042688
+  },
+  "student": {
+    "warmup": 5,
+    "repeats": 10,
+    "mean_seconds": 0.1335119711997322,
+    "median_seconds": 0.126516514499599,
+    "min_seconds": 0.11187120599970513,
+    "max_seconds": 0.1807562530011637,
+    "p95_seconds": 0.1807562530011637,
+    "output_shape": [
+      1,
+      50,
+      7
+    ],
+    "output_finite": true,
+    "peak_gpu_bytes": 3109042688,
+    "adapter_parameter_count": 97420192
+  },
+  "comparison": {
+    "same_seed_action_mse": 0.11197862774133682,
+    "same_seed_action_mae": 0.23659256100654602,
+    "teacher_action_shape": [
+      1,
+      50,
+      7
+    ],
+    "student_action_shape": [
+      1,
+      50,
+      7
+    ]
+  }
+}

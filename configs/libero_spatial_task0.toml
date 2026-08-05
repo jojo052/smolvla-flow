@@ -1,0 +1,92 @@
+schema_version = 1
+
+[experiment]
+name = "libero_spatial_task0_action_distill_rtc_v1"
+status = "preflight"
+task_scope = "single_task"
+
+[dataset]
+repo_id = "HuggingFaceVLA/libero"
+suite = "libero_spatial"
+suite_task_id = 0
+dataset_task_index = -1
+fps = 10
+camera_count = 2
+state_dim = 8
+action_dim = 7
+
+[teacher]
+checkpoint = "lerobot/smolvla_libero"
+checkpoint_status = "pending_interface_preflight"
+interface_compatible_candidate = "HuggingFaceVLA/smolvla_libero"
+candidates = ["lerobot/smolvla_libero", "HuggingFaceVLA/smolvla_libero"]
+flow_steps = 10
+chunk_size = 50
+execute_steps = 10
+freeze_teacher = true
+
+[baseline.act]
+enabled = true
+chunk_size = 50
+n_action_steps = 10
+n_obs_steps = 1
+batch_size = 16
+train_steps = 50000
+
+[baseline.diffusion]
+enabled = true
+horizon = 64
+n_action_steps = 10
+n_obs_steps = 2
+batch_size = 8
+train_steps = 100000
+train_diffusion_steps = 100
+eval_diffusion_steps = [100, 20, 10, 5]
+
+[distillation]
+enabled = true
+scope = "action_only"
+progressive_flow_steps = [5, 2]
+teacher_trajectory_weight = 1.0
+action_regression_weight = 1.0
+semantic_loss_enabled = false
+
+[control]
+frequency_hz = 20
+period_ms = 50
+chunk_size = 50
+execute_steps = 10
+overlap_steps = 10
+early_trigger_mode = "measured_inference_delay"
+
+[control.gripper]
+action_index = 6
+mode = "hysteresis"
+low_threshold = -0.5
+high_threshold = 0.5
+polarity = "pending_preflight"
+
+[control.rtc]
+enabled = true
+execution_horizon = 10
+max_guidance_weight = 10.0
+prefix_attention_schedule = "EXP"
+inference_delay_mode = "measured_at_runtime"
+debug = true
+
+[evaluation.development]
+seeds = [0]
+episodes_per_seed = 20
+
+[evaluation.formal]
+status = "pending_user_decision"
+seeds = []
+episodes_per_seed = 0
+
+[gates]
+require_task_episode_mapping = true
+require_checkpoint_interface_match = true
+require_teacher_forward_pass = true
+require_baseline_smoke_runs = true
+require_gripper_polarity_check = true
+require_teacher_checkpoint_subdecision = true

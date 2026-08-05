@@ -1,0 +1,74 @@
+{
+  "status": "completed",
+  "checkpoint": "HuggingFaceVLA/smolvla_libero",
+  "checkpoint_path": "<remote-home>/.cache/huggingface/hub/models--HuggingFaceVLA--smolvla_libero/snapshots/6721902bc4d61e50a3bfdb11dfb4cb626f05d102",
+  "adapter": "artifacts/distillation/task0_dev5_final/student_2_action_expert.pt",
+  "episode_index": 1272,
+  "runtime": {
+    "control_frequency_hz": 20.0,
+    "chunk_size": 50,
+    "execute_steps": 10,
+    "overlap_steps": 10,
+    "prefetch_threshold": 10,
+    "rtc_enabled": true,
+    "rtc_execution_horizon": 10,
+    "gripper_polarity": "positive_open",
+    "postprocessor_enabled": true
+  },
+  "ticks": 120,
+  "elapsed_seconds": 6.422715918999529,
+  "initial_warmup_seconds": 0.4988237970010232,
+  "actions_emitted": 120,
+  "waiting_ticks": 0,
+  "triggered_inference_ticks": 3,
+  "queue_depth_min": 7,
+  "queue_depth_max": 49,
+  "server": {
+    "submitted": 3,
+    "completed": 3,
+    "dropped_stale": 0,
+    "busy": false,
+    "last_delay_steps": 5,
+    "last_error": null
+  },
+  "inference_events": [
+    {
+      "request_id": 1,
+      "elapsed_seconds": 0.1542308360003517,
+      "inference_delay": 0,
+      "resulting_delay": 4,
+      "queue_depth_before_merge": 7,
+      "queue_depth_at_completion": 46,
+      "dropped_new_steps": 4,
+      "deadline_miss": false,
+      "error": null
+    },
+    {
+      "request_id": 2,
+      "elapsed_seconds": 0.14560147100019094,
+      "inference_delay": 4,
+      "resulting_delay": 3,
+      "queue_depth_before_merge": 7,
+      "queue_depth_at_completion": 47,
+      "dropped_new_steps": 3,
+      "deadline_miss": false,
+      "error": null
+    },
+    {
+      "request_id": 3,
+      "elapsed_seconds": 0.20598660199902952,
+      "inference_delay": 3,
+      "resulting_delay": 5,
+      "queue_depth_before_merge": 9,
+      "queue_depth_at_completion": 45,
+      "dropped_new_steps": 5,
+      "deadline_miss": false,
+      "error": null
+    }
+  ],
+  "output_shape": [
+    1,
+    50,
+    7
+  ]
+}
