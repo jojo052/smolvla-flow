@@ -8,7 +8,7 @@
 | --- | --- |
 | 任务范围 | 单任务，`LIBERO-Spatial task 0` |
 | 数据集 | `HuggingFaceVLA/libero` |
-| 10 步教师 | 官方 LIBERO 预训练 checkpoint，具体仓库 ID 等待接口子决策 |
+| 10 步教师 | `HuggingFaceVLA/smolvla_libero`，已在 4090 完成严格加载和 task0 前向预检 |
 | 蒸馏范围 | 第一版只蒸馏动作专家 |
 | 蒸馏路径 | 10 步教师到 5 步学生，再到 2 步学生 |
 | ACT | `chunk_size=50`、`n_action_steps=10`、`n_obs_steps=1`、batch 16、训练 50k step |
@@ -48,4 +48,6 @@ RTC 已经在 Flow Matching 采样过程中约束新 chunk 的重叠前缀。第
 
 蒸馏损失权重当前暂设为 1:1。5 步学生短训后会报告两项损失的实际量级，再由用户决定是否调整。
 
-教师仓库还需要一个子决策。当前建议 `HuggingFaceVLA/smolvla_libero`，因为输入契约与 `HuggingFaceVLA/libero` 完全一致。选择 `lerobot/smolvla_libero` 时需要额外确定 8 维状态到 6 维状态的变换以及第三路空相机来源。最终选择应依据 4090 上的真实前向测试。
+教师仓库子决策已经完成，采用 `HuggingFaceVLA/smolvla_libero`。它的输入契约与
+`HuggingFaceVLA/libero` 一致，4090 严格加载和 task0 前向均已通过。`lerobot/smolvla_libero`
+保留为接口对照，不进入当前第一版蒸馏和 rollout 主线。

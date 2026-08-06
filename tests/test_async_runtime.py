@@ -249,6 +249,49 @@ def test_policy_server_uses_consumed_control_ticks_when_supplied() -> None:
         server.close()
 
 
+def test_policy_server_reuses_resulting_delay_for_next_rtc_request() -> None:
+    config = AsyncRuntimeConfig(
+        control_frequency_hz=20.0,
+        overlap_steps=2,
+        rtc_enabled=True,
+        rtc_execution_horizon=2,
+        gripper_polarity="positive_open",
+    )
+    queue = ActionQueue(overlap_steps=config.overlap_steps)
+    queue.seed(torch.zeros(8, 7))
+    calls: list[dict] = []
+    first_started = threading.Event()
+    release_first = threading.Event()
+
+    def policy(observation, **kwargs):
+        del observation
+        calls.append(kwargs)
+        if len(calls) == 1:
+            first_started.set()
+            assert release_first.wait(timeout=1.0)
+        return torch.ones(4, 7)
+
+    server = AsyncPolicyServer(policy, queue, config)
+    try:
+        submitted_step = server.advance_control_step()
+        assert server.submit({"frame": 1}, control_step=submitted_step)
+        assert first_started.wait(timeout=1.0)
+        for _ in range(3):
+            server.advance_control_step()
+            queue.pop()
+        release_first.set()
+        assert server.wait_for_idle(timeout=1.0)
+        first_event = server.events()[0]
+        assert first_event.resulting_delay == 3
+
+        assert server.submit({"frame": 2}, control_step=server.advance_control_step())
+        assert server.wait_for_idle(timeout=1.0)
+        assert calls[1]["inference_delay"] == first_event.resulting_delay
+    finally:
+        release_first.set()
+        server.close()
+
+
 def test_controller_prefetches_before_queue_is_empty() -> None:
     config = AsyncRuntimeConfig(
         overlap_steps=2,

@@ -2,22 +2,22 @@ schema_version = 1
 
 [experiment]
 name = "libero_spatial_task0_action_distill_rtc_v1"
-status = "preflight"
+status = "development"
 task_scope = "single_task"
 
 [dataset]
 repo_id = "HuggingFaceVLA/libero"
 suite = "libero_spatial"
 suite_task_id = 0
-dataset_task_index = -1
+dataset_task_index = 34
 fps = 10
 camera_count = 2
 state_dim = 8
 action_dim = 7
 
 [teacher]
-checkpoint = "lerobot/smolvla_libero"
-checkpoint_status = "pending_interface_preflight"
+checkpoint = "HuggingFaceVLA/smolvla_libero"
+checkpoint_status = "interface_preflight_passed"
 interface_compatible_candidate = "HuggingFaceVLA/smolvla_libero"
 candidates = ["lerobot/smolvla_libero", "HuggingFaceVLA/smolvla_libero"]
 flow_steps = 10
@@ -89,4 +89,4 @@ require_checkpoint_interface_match = true
 require_teacher_forward_pass = true
 require_baseline_smoke_runs = true
 require_gripper_polarity_check = true
-require_teacher_checkpoint_subdecision = true
+require_teacher_checkpoint_subdecision = false

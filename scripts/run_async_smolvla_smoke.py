@@ -18,6 +18,7 @@ from smolvla_flow.async_runtime import (
     AsyncRuntimeConfig,
     LeRobotPostprocessorAdapter,
     PreprocessedPolicyAdapter,
+    seed_policy_rng,
 )
 
 
@@ -44,6 +45,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--adapter", type=Path, required=True)
     parser.add_argument("--parquet", type=Path, required=True)
     parser.add_argument("--episode-index", type=int, default=1272)
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+        help="reset Python, NumPy, and PyTorch RNGs before the warmup forward "
+        "so the fixed-observation smoke is reproducible",
+    )
     parser.add_argument("--task", default=TASK0_LANGUAGE)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--ticks", type=int, default=120)
@@ -121,6 +129,7 @@ def main() -> None:
     observation = _load_observation(args.parquet, args.episode_index, args.task)
     policy, preprocessor, postprocessor, checkpoint_path = _load_policy(args.checkpoint, args.adapter, args.device)
     policy.eval()
+    seed_policy_rng(args.seed)
     config = AsyncRuntimeConfig(
         control_frequency_hz=20.0,
         chunk_size=50,
@@ -140,6 +149,7 @@ def main() -> None:
         PreprocessedPolicyAdapter(policy, preprocessor),
         action_queue,
         config,
+        seed=args.seed,
     )
     controller = AsyncClosedLoopController(
         server,
@@ -169,6 +179,7 @@ def main() -> None:
         "checkpoint_path": str(checkpoint_path),
         "adapter": str(args.adapter),
         "episode_index": args.episode_index,
+        "seed": args.seed,
         "runtime": {
             "control_frequency_hz": config.control_frequency_hz,
             "chunk_size": config.chunk_size,

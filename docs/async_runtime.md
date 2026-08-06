@@ -15,7 +15,7 @@ flowchart LR
     S --> W[推理线程]
     W --> R[RTC: delay + previous prefix + horizon]
     R --> M[新 chunk]
-    M --> F[10 步重叠融合]
+    M --> F[RTC replace 或无 RTC 时重叠融合]
     F --> Q
     Q --> A[执行 1 个动作]
 ```
@@ -27,8 +27,8 @@ flowchart LR
 1. 读取当前队列深度。
 2. 深度小于等于 10，且推理线程空闲时提交当前观测。
 3. 提交请求时保存旧队列前 10 个未执行动作，作为 RTC 的 `prev_chunk_left_over`。
-4. 推理线程测量本次耗时。传给下一次 RTC 的 `inference_delay` 为 `ceil(耗时 × 20)`，单位是控制步数。
-5. 新 chunk 返回后，先丢弃新 chunk 的前 `inference_delay` 步。这些步对应推理期间已经过去的控制时间。随后旧队列和新 chunk 的前 `L=10` 步做线性融合：
+4. 推理线程测量本次耗时。请求带有控制步编号时，传给下一次 RTC 的 `inference_delay` 是推理期间实际消费的控制步数；没有控制步编号时才退回 `ceil(耗时 × 20)` 的墙上时间估计。
+5. RTC 开启时，新 chunk 返回后先丢弃推理期间已经过去的前缀，再直接替换队列。RTC 关闭时，才对旧队列和新 chunk 的前 `L=10` 步做线性融合：
 
    ```text
    a[i] = (1 - (i + 1) / L) * a_old[i]
@@ -51,13 +51,41 @@ policy.predict_action_chunk(
 )
 ```
 
-当前配置为 `RTC enabled=true`、指数 prefix schedule、guidance weight 10、execution horizon 10。RTC 负责采样过程中的前缀约束，动作队列负责控制线程和推理线程解耦，普通重叠融合负责 chunk 返回后的最终队列连续性。两层都保留，便于后续做消融。
+当前配置为 `RTC enabled=true`、指数 prefix schedule、guidance weight 10、execution horizon 10。RTC 负责采样过程中的前缀约束，动作队列负责控制线程和推理线程解耦，RTC 路径采用 replace 语义。关闭 RTC 的消融路径才启用 10 步 overlap blend。
+
+## 配置护栏
+
+`configs/libero_spatial_task0.toml` 的 `[control.rtc]` 块在 `validate_rtc_config` 中做锁定校验。
+运行 rollout 前先执行 `python scripts/validate_experiment_config.py`，确认配置护栏通过。护栏拒绝以下漂移：
+
+- `enabled` 不是布尔 true，或 `execution_horizon` 不等于 10。
+- `execution_horizon` 超过 `control.chunk_size` 或 `teacher.chunk_size`，或与 `control.execute_steps`、`teacher.execute_steps` 不一致。
+- `max_guidance_weight` 不是正有限数值。
+- `prefix_attention_schedule` 不是 `EXP` 或 `LINEAR`。
+- `inference_delay_mode` 不是 `measured_at_runtime`，`debug` 不是布尔值。
+
+运行时把 `rtc_execution_horizon` 和 `execute_steps` 作为独立参数使用，护栏保证两者在配置层保持对齐。
+rollout 命令中的 `--disable-rtc`、`--rtc-max-guidance-weight` 和 `--rtc-schedule`
+属于消融覆盖项，不会改写 TOML，也不会被 TOML 护栏代替校验；使用这些选项时应把完整命令
+和参数写入实验记录。该文件同时保留原有全部选项、字段和逻辑，只新增校验分支。
 
 ## 冷启动和安全边界
 
 模型第一次 CUDA 前向包含加载和 kernel warmup，不能直接拿它作为控制线程的实时延迟。实际运行时先同步生成一个初始 chunk，再启动 20 Hz 控制循环。后续推理在线程中执行。
 
 夹爪方向尚未完成真机和仿真确认。代码在硬件模式下拒绝 `gripper_polarity=pending`，当前 smoke 使用 `positive_open` 只代表软件链路测试。队列耗尽时运行时返回 `waiting_for_policy=true`，真机接入时应绑定保持上一安全动作或急停策略，不能把空动作当成合法控制命令。
+
+## 固定 seed 可复现
+
+Flow Matching 采样从随机噪声出发，固定 RNG 可以让同一运行模式和同一 episode 的结果复现。
+`seed_policy_rng(seed)` 同时重置 Python `random`、NumPy 和 PyTorch（含 CUDA）RNG。
+PyTorch 的默认 CPU generator 是线程局部的，主线程播种不会影响推理线程，所以
+`AsyncPolicyServer(..., seed=...)` 会在 worker 线程启动时在自己的线程里重新播种。
+`run_libero_rollout.py` 的 `--torch-seed` 在每个 episode 的首次策略前向处调用它，
+并把同一值传给 `AsyncPolicyServer`。同步与异步使用同一个起始 seed，但 warmup、线程调度
+和请求数量可能让后续随机噪声序列错位，所以不能要求两种模式逐前向使用相同噪声。
+异步模式仍受控制线程时序影响，固定 seed 也不等于动作轨迹逐位相同。
+`run_async_smolvla_smoke.py` 的 `--seed` 用于固定观测 smoke。
 
 ## 已完成的真实 smoke
 
@@ -75,7 +103,8 @@ policy.predict_action_chunk(
 | waiting tick | 0 |
 | 提前触发次数 | 3 |
 | 推理耗时 | 154.2 ms、145.6 ms、206.0 ms |
-| RTC delay | 0 → 4 → 3 → 5 步 |
+| resulting delay（队列实际丢弃） | 4、3、5 步 |
+| inference delay（传给当前请求） | 0、4、3 步 |
 | 合并前队列深度 | 7、7、9 |
 | 丢弃新 chunk 前缀 | 4、3、5 步 |
 | deadline miss | 0 |

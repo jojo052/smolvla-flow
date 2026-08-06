@@ -29,13 +29,14 @@ from smolvla_flow.async_runtime import (
     AsyncRuntimeConfig,
     LeRobotPostprocessorAdapter,
     PreprocessedPolicyAdapter,
+    seed_policy_rng,
 )
 
 
 TASK0_LANGUAGE = "pick up the black bowl between the plate and the ramekin and place it on the plate"
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", default="HuggingFaceVLA/smolvla_libero")
     parser.add_argument("--adapter", type=Path, default=None)
@@ -46,6 +47,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--task", default=None)
     parser.add_argument("--episodes", type=int, default=1)
     parser.add_argument("--start-seed", type=int, default=0)
+    parser.add_argument(
+        "--torch-seed",
+        type=int,
+        default=None,
+        help="reset Python, NumPy, and PyTorch RNGs to this value before each episode "
+        "so policy sampling is reproducible; omit to keep the current unseeded behavior",
+    )
     parser.add_argument("--max-steps", type=int, default=None)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--assets-dir", type=Path, default=None)
@@ -68,7 +76,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=Path("artifacts/rollout/libero_spatial_task0_rollout.json"),
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def _package_root() -> Path:
@@ -290,9 +298,12 @@ def _run_sync_episode(
     prepare_observation,
     seed: int,
     max_steps: int,
+    torch_seed: int | None,
 ) -> dict[str, Any]:
     from smolvla_flow.async_runtime import LeRobotPostprocessorAdapter
 
+    if torch_seed is not None:
+        seed_policy_rng(torch_seed)
     policy.reset()
     raw_observation, _ = env.reset(seed=seed)
     postprocess_action = LeRobotPostprocessorAdapter(postprocessor)
@@ -348,7 +359,10 @@ def _run_async_episode(
     prefetch_threshold: int,
     rtc_enabled: bool,
     rtc_use_prefix: bool,
+    torch_seed: int | None,
 ) -> dict[str, Any]:
+    if torch_seed is not None:
+        seed_policy_rng(torch_seed)
     policy.reset()
     raw_observation, _ = env.reset(seed=seed)
     runtime_config = AsyncRuntimeConfig(
@@ -377,6 +391,7 @@ def _run_async_episode(
         PreprocessedPolicyAdapter(policy, prepare_for_worker),
         action_queue,
         runtime_config,
+        seed=torch_seed,
     )
     controller = AsyncClosedLoopController(
         server,
@@ -483,6 +498,7 @@ def main() -> int:
         "task_id": args.task_id,
         "episodes_requested": args.episodes,
         "start_seed": args.start_seed,
+        "torch_seed": args.torch_seed,
     }
     try:
         if args.episodes < 1:
@@ -510,6 +526,8 @@ def main() -> int:
         episode_results = []
         for offset in range(args.episodes):
             seed = args.start_seed + offset
+            if args.torch_seed is not None:
+                seed_policy_rng(args.torch_seed)
             env = _make_env(suite, args, args.task_id, seed)
             try:
                 if args.mode == "sync":
@@ -522,6 +540,7 @@ def main() -> int:
                         prepare_observation,
                         seed,
                         max_steps,
+                        args.torch_seed,
                     )
                 else:
                     episode = _run_async_episode(
@@ -539,7 +558,9 @@ def main() -> int:
                         args.prefetch_threshold,
                         not args.disable_rtc,
                         not args.disable_rtc_prefix,
+                        args.torch_seed,
                     )
+                episode["torch_seed"] = args.torch_seed
             finally:
                 env.close()
             episode_results.append(episode)

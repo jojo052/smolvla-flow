@@ -76,12 +76,18 @@ def main() -> None:
     import pyarrow.compute as pc
     import pyarrow.parquet as pq
     import torch
+
+    args = parse_args()
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "preflight_teacher_forward.py requires a CUDA device; "
+            "torch.cuda.is_available() is false"
+        )
     from huggingface_hub import hf_hub_download
     from lerobot.policies import make_pre_post_processors
     from lerobot.policies.smolvla.configuration_smolvla import SmolVLAConfig
     from lerobot.policies.smolvla.modeling_smolvla import SmolVLAPolicy
 
-    args = parse_args()
     table = pq.read_table(args.parquet)
     table = table.filter(pc.equal(table["episode_index"], args.episode_index))
     if table.num_rows == 0:

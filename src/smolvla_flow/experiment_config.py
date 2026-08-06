@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 import tomllib
 from typing import Any
@@ -9,6 +10,11 @@ from typing import Any
 
 class ExperimentConfigError(ValueError):
     """Raised when an experiment configuration violates a required invariant."""
+
+
+def _require(condition: bool, message: str) -> None:
+    if not condition:
+        raise ExperimentConfigError(message)
 
 
 def load_experiment_config(path: str | Path) -> dict[str, Any]:
@@ -26,7 +32,6 @@ def validate_experiment_config(config: dict[str, Any]) -> None:
     diffusion = config["baseline"]["diffusion"]
     distillation = config["distillation"]
     control = config["control"]
-    rtc = control["rtc"]
 
     if dataset["suite"] != "libero_spatial" or dataset["suite_task_id"] != 0:
         raise ExperimentConfigError("v1 must target LIBERO-Spatial task 0")
@@ -48,10 +53,62 @@ def validate_experiment_config(config: dict[str, Any]) -> None:
         raise ExperimentConfigError("v1 controller must run at 20 Hz with a 50 ms period")
     if control["overlap_steps"] != 10:
         raise ExperimentConfigError("v1 overlap must contain 10 actions")
-    if not rtc["enabled"] or rtc["execution_horizon"] != 10:
-        raise ExperimentConfigError("RTC must be enabled with a 10-step execution horizon")
     if control["gripper"]["mode"] != "hysteresis":
         raise ExperimentConfigError("the gripper dimension must use hysteresis")
+    validate_rtc_config(config)
+
+
+def validate_rtc_config(config: dict[str, Any]) -> None:
+    """Guard the locked ``[control.rtc]`` block and its cross-section invariants.
+
+    The runtime takes ``rtc_execution_horizon`` and ``execute_steps`` as
+    separate knobs, so the locked experiment must keep them aligned.  The
+    guard rejects horizon/chunk drift, non-positive or non-finite guidance
+    weights, unsupported prefix schedules and delay modes, and non-boolean
+    flags before any RTC rollout can start.
+    """
+
+    control = config["control"]
+    teacher = config["teacher"]
+    rtc = control["rtc"]
+
+    horizon = rtc["execution_horizon"]
+    _require(
+        isinstance(horizon, int) and not isinstance(horizon, bool) and horizon >= 1,
+        "RTC execution_horizon must be a positive integer",
+    )
+    _require(rtc["enabled"] is True, "RTC must be enabled with a boolean true value")
+    _require(horizon == 10, "RTC must use a 10-step execution horizon")
+    _require(horizon <= control["chunk_size"], "RTC execution_horizon cannot exceed the controller chunk_size")
+    _require(horizon <= teacher["chunk_size"], "RTC execution_horizon cannot exceed the teacher chunk_size")
+    _require(
+        horizon == control["execute_steps"],
+        "RTC execution_horizon must match control.execute_steps",
+    )
+    _require(
+        horizon == teacher["execute_steps"],
+        "RTC execution_horizon must match teacher.execute_steps",
+    )
+
+    guidance = rtc["max_guidance_weight"]
+    _require(
+        not isinstance(guidance, bool)
+        and isinstance(guidance, (int, float))
+        and math.isfinite(float(guidance))
+        and guidance > 0,
+        "RTC max_guidance_weight must be a positive finite number",
+    )
+    schedule = rtc["prefix_attention_schedule"]
+    _require(
+        schedule in ("EXP", "LINEAR"),
+        "RTC prefix_attention_schedule must be EXP or LINEAR",
+    )
+    delay_mode = rtc["inference_delay_mode"]
+    _require(
+        delay_mode == "measured_at_runtime",
+        "RTC inference_delay_mode must be measured_at_runtime",
+    )
+    _require(isinstance(rtc["debug"], bool), "RTC debug must be a boolean")
 
 
 def unresolved_preflight_items(config: dict[str, Any]) -> list[str]:

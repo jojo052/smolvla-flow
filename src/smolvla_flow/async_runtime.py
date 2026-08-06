@@ -15,12 +15,14 @@ from __future__ import annotations
 
 import math
 import queue as thread_queue
+import random
 import threading
 import time
 from collections import deque
 from dataclasses import dataclass, field
 from typing import Any, Callable, Deque, Protocol
 
+import numpy as np
 import torch
 from torch import Tensor
 
@@ -43,6 +45,23 @@ def _as_action_chunk(actions: Tensor) -> Tensor:
     if not torch.isfinite(actions).all().item():
         raise ValueError("policy output contains non-finite values")
     return actions.detach().clone()
+
+
+def seed_policy_rng(seed: int) -> None:
+    """Reset Python, NumPy, and PyTorch RNGs for one reproducible run.
+
+    Flow Matching sampling starts from random noise. Call this before the
+    first policy request of each episode. Thread scheduling and warmup can
+    still change the later random-draw order in an asynchronous rollout.
+    """
+
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise TypeError("seed must be an integer")
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
 
 
 @dataclass(frozen=True)
@@ -425,10 +444,14 @@ class AsyncPolicyServer:
         config: AsyncRuntimeConfig,
         *,
         clock: Callable[[], float] = time.monotonic,
+        seed: int | None = None,
     ) -> None:
+        if seed is not None and (isinstance(seed, bool) or not isinstance(seed, int)):
+            raise TypeError("seed must be an integer or None")
         self.policy = policy
         self.action_queue = action_queue
         self.config = config
+        self._seed = seed
         # Keep the queue's replacement/append semantics aligned with the
         # policy's RTC setting.  Existing callers can continue constructing an
         # ActionQueue with only `overlap_steps`.
@@ -557,6 +580,10 @@ class AsyncPolicyServer:
             raise RuntimeStateError("policy worker did not stop before timeout")
 
     def _worker_loop(self) -> None:
+        if self._seed is not None:
+            # The default CPU generator is thread-local, so main-thread
+            # seeding does not control noise drawn inside this worker.
+            seed_policy_rng(self._seed)
         while not self._stop.is_set():
             try:
                 request = self._requests.get(timeout=0.05)
@@ -609,7 +636,10 @@ class AsyncPolicyServer:
             with self._state_lock:
                 self._inflight = False
                 self._last_delay_steps = resulting_delay
-                self._last_rtc_delay_steps = wall_delay_steps
+                # RTC guidance must use the number of control actions that
+                # were actually consumed while this request was in flight.
+                # Wall-clock latency is retained separately for diagnostics.
+                self._last_rtc_delay_steps = resulting_delay
                 self._last_event = event
                 self._events.append(event)
                 self._completed += 1
@@ -692,4 +722,5 @@ __all__ = [
     "QueueMergeResult",
     "RuntimeStateError",
     "TickResult",
+    "seed_policy_rng",
 ]

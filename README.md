@@ -7,10 +7,11 @@
 | 项目 | 当前结果 | 说明 |
 | --- | --- | --- |
 | task0 语义映射 | 已确认 | LIBERO-Spatial task 0 对应数据集 `task_index=34` |
+| task0 固定划分 | 已实现脚本 | 45 个 episode 可生成 31/7/7 train/validation/test，完整窗口数按 `sample_stride=4` 统计 |
 | task0 蒸馏数据 | 开发诊断 | 当前记录只有 9 个完整的 50 帧 chunk |
 | 10 → 5 → 2 蒸馏 | 已完成开发链路 | 每阶段 50 次更新的结果只用于诊断，不能代表正式质量 |
-| 固定 seed=123 同步对照 | 3/5 成功 | 2 步蒸馏学生，5 个 episode |
-| 固定 seed=123 异步对照 | 2/5 成功 | 无 RTC 和 RTC replace 两种队列实验均为 2/5 |
+| 固定 seed=123 同步对照 | 历史 3/5 | 2 步蒸馏学生，5 个 episode；需用当前 `--torch-seed` 重新生成 |
+| 固定 seed=123 异步对照 | 历史 2/5 | 无 RTC 和 RTC replace 两种队列实验均为 2/5；需用当前 `--torch-seed` 重新生成 |
 | ACT | 未完成 | 100 step 冒烟和 LIBERO episode 尚未运行 |
 | Diffusion Policy | 未完成 | 100 step 冒烟和 LIBERO episode 尚未运行 |
 | 多 seed 评测 | 未完成 | 还没有固定验证集上的完整多 seed 结果 |
@@ -20,7 +21,7 @@
 
 ## TODO
 
-1. 从 `task_index=34` 的全部可用 episode 建立固定训练、验证和测试划分，记录完整 chunk 数量。
+1. 在 GPU 环境运行固定划分脚本，确认完整 parquet 数据与 31/7/7 episode manifest 一致。
 2. 增加蒸馏更新步数，固定验证 chunk 和随机种子，报告动作 MSE、MAE、轨迹误差和有限值检查。
 3. 完成 ACT 与 Diffusion Policy 的 100 step 冒烟训练，再接入相同的 LIBERO episode 划分。
 4. 运行原生 10 步教师、未蒸馏少步教师和蒸馏学生的多 seed 同步对照。
@@ -73,6 +74,20 @@ python "$PROJECT_ROOT/scripts/inspect_libero_task.py" \
   --metadata-root "$LIBERO_METADATA_ROOT" \
   --output "$PROJECT_ROOT/artifacts/preflight/libero_spatial_task0.json"
 ```
+
+生成固定 episode 划分和完整动作窗口统计。脚本只读取 `meta/`，不会读取或复制图像、动作 parquet 数据：
+
+```bash
+python "$PROJECT_ROOT/scripts/build_task_index_data.py" \
+  --metadata-root "$LIBERO_METADATA_ROOT" \
+  --task-index 34 \
+  --chunk-size 50 \
+  --sample-stride 4 \
+  --seed 0 \
+  --output "$PROJECT_ROOT/artifacts/preflight/libero_spatial_task0_split.json"
+```
+
+当前 45 个 task34 episode 的元数据统计为 4487 帧、584 个 stride=4 完整窗口、61 个不重叠完整窗口。实际训练前仍需确认对应数据 shard 全部可读。
 
 下面的命令展示 task0 的语义过滤流程。`EPISODE_INDEX` 应来自元数据，不再把单个历史 episode 写死在命令里。
 
@@ -153,10 +168,39 @@ python "$PROJECT_ROOT/scripts/run_libero_rollout.py" \
 
 输出会记录成功率、累计 reward、实际控制频率、等待 tick、推理延迟、动作平滑度和异步队列事件。
 
+固定 seed 对照需要让策略采样噪声可复现。`run_libero_rollout.py` 的 `--torch-seed`
+在每个 episode 的首次策略前向处重置 Python、NumPy 和 PyTorch（含 CUDA）RNG，
+并把同一值传给推理线程，worker 线程在自己的线程里重新播种（PyTorch 默认 CPU
+generator 是线程局部的）。同步与异步使用相同起始值，后续噪声序列仍可能受 warmup 和线程调度影响。
+不传该参数时保持原有的非种子行为。
+
+```bash
+python "$PROJECT_ROOT/scripts/run_libero_rollout.py" \
+  --mode sync \
+  --flow-steps 2 \
+  --adapter "$ADAPTER_PATH" \
+  --episodes 5 \
+  --start-seed 0 \
+  --torch-seed 123 \
+  --assets-dir "$LIBERO_ASSETS_DIR" \
+  --output "$PROJECT_ROOT/artifacts/rollout/student_task0_sync_fixed.json"
+
+python "$PROJECT_ROOT/scripts/run_libero_rollout.py" \
+  --mode async \
+  --flow-steps 2 \
+  --adapter "$ADAPTER_PATH" \
+  --episodes 5 \
+  --start-seed 0 \
+  --torch-seed 123 \
+  --assets-dir "$LIBERO_ASSETS_DIR" \
+  --output "$PROJECT_ROOT/artifacts/rollout/student_task0_async_fixed.json"
+```
+
 ## 失败记录与实验日志
 
 - [完整实验日志](docs/experiment_log.md)：包含教师预检、蒸馏开发、异步 smoke、固定 seed 诊断和 LIBERO 回放。
 - [异步运行时说明](docs/async_runtime.md)：包含队列、重叠融合、RTC 和控制线程约束。
+- [task34 固定划分 manifest](artifacts/preflight/libero_spatial_task0_split.json)：记录 31/7/7 episode 划分和完整动作窗口统计。
 - [LIBERO 资产缺失预检](artifacts/rollout/libero_spatial_task0_rollout.json)：记录为 `blocked`，不应当解释为成功率为零。
 - [task0 教师同步回放](artifacts/rollout/libero_spatial_task0_teacher_sync.json)：首轮真实回放为 1/1。
 - [task0 学生异步回放](artifacts/rollout/libero_spatial_task0_student_async.json)：首轮真实回放为 0/1，需要扩大数据和验证 episode。

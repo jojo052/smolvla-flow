@@ -318,3 +318,67 @@ RTC 队列修复遵循 LeRobot 的 original queue 与 execution queue 分离语�
 首轮 0/1 结果不能单独说明蒸馏权重失效。当前应将模型质量不足与异步控制降级分开处理：
 前者需要增加完整 chunk、更新步数和验证 episode，后者需要继续比较队列替换、RTC 引导、
 控制频率和动作平滑度。
+
+## 2026-08-06：固定 seed 可复现性修复
+
+### 问题
+
+2026-08-05 的固定 seed=123 对照依赖 torch seed=123，但提交的
+`scripts/run_libero_rollout.py` 没有任何 torch、numpy 或 random 种子设置。
+Flow Matching 采样从随机噪声出发，不固定 RNG 时同一 episode 的策略噪声在不同进程间
+不可复现，文档中的同步与异步对照命令无法重建。
+
+### 修复
+
+`src/smolvla_flow/async_runtime.py` 新增 `seed_policy_rng(seed)`，同时重置
+Python `random`、NumPy 和 PyTorch（含 CUDA）RNG。PyTorch 默认 CPU generator
+是线程局部的，`AsyncPolicyServer` 新增 `seed` 参数，worker 线程启动时在自己的
+线程里重新播种，主线程播种不会影响推理线程的 CPU 噪声。
+
+`scripts/run_libero_rollout.py` 新增 `--torch-seed`（默认不设置，保持原有行为）：
+每个 episode 的首次策略前向处把 RNG 重置为该值，环境构造前后各重置一次，
+输出头部和每个 episode 记录 `torch_seed`。
+`scripts/run_async_smolvla_smoke.py` 新增 `--seed`（默认 0），warmup 前重置 RNG。
+
+固定 seed 对照命令：
+
+```bash
+python scripts/run_libero_rollout.py --mode sync --flow-steps 2 \
+  --adapter "$ADAPTER_PATH" --episodes 5 --start-seed 0 --torch-seed 123 \
+  --assets-dir "$LIBERO_ASSETS_DIR" \
+  --output artifacts/rollout/remote_seed123/sync_reproducible.json
+
+python scripts/run_libero_rollout.py --mode async --flow-steps 2 \
+  --adapter "$ADAPTER_PATH" --episodes 5 --start-seed 0 --torch-seed 123 \
+  --assets-dir "$LIBERO_ASSETS_DIR" \
+  --output artifacts/rollout/remote_seed123/async_reproducible.json
+```
+
+同一 `--torch-seed` 下，同步与异步的每个 episode 从同一初始 RNG 值开始。异步模式的
+warmup、线程调度和请求数量会影响后续随机数消耗，动作轨迹不会逐位相同。旧的 3/5
+和 2/5 结果需要用当前入口重新生成后才能作为可复现实验记录。
+
+验证：新增 `tests/test_runtime_seed.py`，覆盖 RNG 重置可复现性、worker 线程
+RNG 播种和脚本参数。
+
+## 2026-08-06：task34 固定划分与运行时护栏
+
+新增 `scripts/build_task_index_data.py` 和 `src/smolvla_flow/task_split.py`。脚本从本地
+LeRobot `meta/tasks.parquet` 与 `meta/episodes/` 读取 task34 的 episode 元数据，使用 seed=0
+生成固定的 train/validation/test episode 划分，并按 chunk_size=50、sample_stride=4 统计
+完整动作窗口。仓库元数据验证结果为 45 个 episode、4487 帧、584 个 stride=4 完整窗口，
+不重叠窗口为 61 个。脚本输出只包含元数据和 shard 相对路径，不包含图像或动作数据。
+
+配置已锁定为 `dataset_task_index=34` 和 `HuggingFaceVLA/smolvla_libero`。新增
+`validate_rtc_config` 护栏，检查 RTC horizon、chunk、execute steps、guidance weight、
+prefix schedule 和 delay mode 的一致性。实际 rollout 脚本当前通过显式的
+`scripts/validate_experiment_config.py` 预检配置，运行时默认不会自动读取 TOML。
+
+RTC worker 的下一轮 `inference_delay` 现在使用上一轮实际消费的 `resulting_delay`，
+墙上时间换算保留为诊断字段。新增回归测试验证第二次请求收到的 delay 与第一轮队列丢弃步数一致。
+CUDA 教师预检在 CPU 或无 CUDA 环境下会提前给出清晰错误。已有固定观测 smoke 产物来自
+旧运行时，没有 `wall_delay_steps` 字段；新的诊断字段和 resulting-delay 语义需要在 4090
+上重跑 smoke 后才有真实产物支撑。
+
+验证：`PYTHONPATH=src /opt/anaconda3/bin/python -m pytest -q`，56 项通过；task split
+脚本在仓库元数据上生成了 31/7/7 划分。正式蒸馏和 LIBERO 成功率仍需在完整 GPU 数据上运行。
