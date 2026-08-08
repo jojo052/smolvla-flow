@@ -226,6 +226,18 @@ python "$PROJECT_ROOT/scripts/evaluate_acceptance_metrics.py" \
 
 异步 rollout 遇到短暂空队列时会记录 waiting tick，并保持上一条已经过后处理的动作继续推进环境。首次动作就缺失会直接报错，避免用零动作掩盖队列初始化问题。
 
+在 4090 主机上可以用矩阵脚本一次生成原生教师、未蒸馏 2 步、蒸馏 2 步同步、RTC 异步和无融合异步结果：
+
+```bash
+export PROJECT_ROOT="$HOME/projects/smolvla-flow/project"
+export ADAPTER_PATH="$PROJECT_ROOT/artifacts/distillation/task0_dev5_final/student_2_action_expert.pt"
+export LIBERO_ASSETS_DIR="$HOME/.cache/libero/assets"
+export BENCHMARK_JSON="$PROJECT_ROOT/artifacts/distillation/task0_dev5_final/benchmark.json"
+bash "$PROJECT_ROOT/scripts/run_acceptance_matrix.sh"
+```
+
+脚本默认使用 episode seed 0 到 4 和 `torch_seed=123`，结果写入 `artifacts/rollout/current_seed123/`。如果远程数据 shard 或 checkpoint 缓存不完整，脚本会在对应阶段停止，已有 JSON 不会被覆盖。
+
 ## 失败记录与实验日志
 
 - [完整实验日志](docs/experiment_log.md)：包含教师预检、蒸馏开发、异步 smoke、固定 seed 诊断和 LIBERO 回放。

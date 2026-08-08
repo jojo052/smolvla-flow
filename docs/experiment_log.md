@@ -397,6 +397,8 @@ CUDA 教师预检在 CPU 或无 CUDA 环境下会提前给出清晰错误。已�
 
 新增 `scripts/evaluate_acceptance_metrics.py` 和 `src/smolvla_flow/evaluation.py`。脚本对验收项输出 `pass`、`fail` 或 `unknown`，旧产物缺少字段时保留证据缺口。蒸馏验证集误差仍要求单独提供蒸馏 2 步和未蒸馏 2 步的验证结果。
 
+新增 `scripts/run_acceptance_matrix.sh`，在 GPU 主机上用同一组 episode seed 和 `torch_seed` 依次运行原生教师、未蒸馏 2 步、蒸馏 2 步同步、RTC 异步和无融合异步。无融合路径显式使用 `--disable-rtc --overlap-steps 0`，避免把 overlap blend 结果误当作直接切换基线。
+
 ### 本机回放历史产物的自动汇总
 
 使用 2026-08-05 的历史同步、异步和 benchmark JSON 运行汇总脚本，结果如下：
