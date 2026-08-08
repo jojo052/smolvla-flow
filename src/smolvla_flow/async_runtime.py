@@ -170,6 +170,7 @@ class ActionQueue:
         self.rtc_enabled = rtc_enabled
         self._original_actions: Deque[Tensor] = deque()
         self._execution_actions: Deque[Tensor] = deque()
+        self._execution_sequence_ids: Deque[int] = deque()
         self._lock = threading.Lock()
         self._sequence_id = 0
 
@@ -199,17 +200,25 @@ class ActionQueue:
         with self._lock:
             self._original_actions.clear()
             self._execution_actions.clear()
+            self._execution_sequence_ids.clear()
 
     def pop(self) -> Tensor | None:
+        action, _sequence_id = self.pop_with_sequence()
+        return action
+
+    def pop_with_sequence(self) -> tuple[Tensor | None, int | None]:
+        """Pop one action together with the chunk sequence that produced it."""
+
         with self._lock:
             if not self._execution_actions:
-                return None
+                return None, None
             action = self._execution_actions.popleft().clone()
+            sequence_id = self._execution_sequence_ids.popleft()
             # Keep the RTC source queue aligned with the execution queue so
             # `snapshot()` exposes only unexecuted original actions.
             if self._original_actions:
                 self._original_actions.popleft()
-            return action
+            return action, sequence_id
 
     def snapshot(self, length: int | None = None, *, batched: bool = True) -> Tensor | None:
         with self._lock:
@@ -290,9 +299,12 @@ class ActionQueue:
                 original = [action.clone() for action in new_actions]
 
             self._sequence_id += 1
+            sequence_id = self._sequence_id
             self._original_actions = deque(original[: self.max_depth])
             self._execution_actions = deque(merged[: self.max_depth])
-            sequence_id = self._sequence_id
+            self._execution_sequence_ids = deque(
+                [sequence_id] * len(self._execution_actions)
+            )
             new_depth = len(self._execution_actions)
         return QueueMergeResult(
             old_depth=old_depth,
@@ -653,6 +665,7 @@ class TickResult:
     queue_depth_before: int
     queue_depth_after: int
     inference_delay_steps: int
+    queue_sequence_id: int | None
 
 
 class AsyncClosedLoopController:
@@ -690,7 +703,7 @@ class AsyncClosedLoopController:
         triggered = False
         if before <= self.config.trigger_threshold and not self.policy_server.busy:
             triggered = self.policy_server.submit(observation, control_step=control_step)
-        action = self.action_queue.pop()
+        action, sequence_id = self.action_queue.pop_with_sequence()
         waiting = action is None
         if action is not None:
             action = self.gripper.apply(action)
@@ -703,6 +716,7 @@ class AsyncClosedLoopController:
             queue_depth_before=before,
             queue_depth_after=self.action_queue.depth(),
             inference_delay_steps=self.policy_server.last_delay_steps,
+            queue_sequence_id=sequence_id,
         )
 
     def close(self) -> None:

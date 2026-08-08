@@ -76,9 +76,13 @@ def _finite_metric(
     )
 
 
-def _task_isolation_metric(rollouts: Sequence[Mapping[str, Any]], target_task_index: int) -> dict[str, Any]:
+def _task_isolation_metric(
+    rollouts: Sequence[Mapping[str, Any]],
+    distillation_metrics: Sequence[Mapping[str, Any]],
+    target_task_index: int,
+) -> dict[str, Any]:
     observed: list[int] = []
-    missing = 0
+    missing_rollout = 0
     for rollout in rollouts:
         top_level = rollout.get("dataset_task_index")
         for episode in _episodes(rollout):
@@ -86,16 +90,57 @@ def _task_isolation_metric(rollouts: Sequence[Mapping[str, Any]], target_task_in
             if isinstance(value, int) and not isinstance(value, bool):
                 observed.append(value)
             else:
-                missing += 1
-    if missing or not observed:
+                missing_rollout += 1
+
+    distillation_evidence: list[dict[str, int]] = []
+    missing_distillation = 0
+    for metrics in distillation_metrics:
+        task_index_filter = metrics.get("task_index_filter")
+        sample_count_after_filter = metrics.get("sample_count_after_task_index_filter")
+        sample_count = metrics.get("sample_count")
+        if not all(
+            isinstance(value, int) and not isinstance(value, bool)
+            for value in (task_index_filter, sample_count_after_filter, sample_count)
+        ):
+            missing_distillation += 1
+            continue
+        distillation_evidence.append(
+            {
+                "task_index_filter": task_index_filter,
+                "sample_count_after_task_index_filter": sample_count_after_filter,
+                "sample_count": sample_count,
+            }
+        )
+
+    value = {
+        "observed_task_indices": sorted(set(observed)),
+        "distillation_evidence": distillation_evidence,
+    }
+    rollout_mismatch = any(task_index != target_task_index for task_index in observed)
+    distillation_mismatch = any(
+        evidence["task_index_filter"] != target_task_index
+        or evidence["sample_count_after_task_index_filter"] < evidence["sample_count"]
+        or evidence["sample_count"] <= 0
+        for evidence in distillation_evidence
+    )
+    if rollout_mismatch or distillation_mismatch:
         return _metric(
-            "unknown",
-            value={"observed_task_indices": sorted(set(observed))},
-            detail="rollout artifacts do not contain explicit dataset_task_index for every episode",
+            "fail",
+            value=value,
+            detail="rollout task index or filtered distillation sample counts do not match the acceptance target",
             target=target_task_index,
         )
-    passed = all(value == target_task_index for value in observed)
-    return _metric("pass" if passed else "fail", value={"observed_task_indices": sorted(set(observed))}, target=target_task_index)
+    if missing_rollout or not observed or missing_distillation or not distillation_evidence:
+        return _metric(
+            "unknown",
+            value=value,
+            detail=(
+                "every rollout episode requires dataset_task_index and every distillation artifact requires "
+                "task_index_filter, sample_count_after_task_index_filter and sample_count"
+            ),
+            target=target_task_index,
+        )
+    return _metric("pass", value=value, target=target_task_index)
 
 
 def _waiting_metric(rollouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
@@ -238,12 +283,13 @@ def evaluate_acceptance(
     target_task_index: int = 34,
     fused_rollout: Mapping[str, Any] | None = None,
     unfused_rollout: Mapping[str, Any] | None = None,
+    distillation_metrics: Sequence[Mapping[str, Any]] = (),
 ) -> dict[str, Any]:
     """Evaluate the acceptance contract without guessing missing evidence."""
 
     return {
         "finite_output": _finite_metric(rollouts, benchmarks),
-        "task_isolation": _task_isolation_metric(rollouts, target_task_index),
+        "task_isolation": _task_isolation_metric(rollouts, distillation_metrics, target_task_index),
         "waiting_ticks": _waiting_metric(rollouts),
         "deadline_miss_ratio": _deadline_metric(rollouts),
         "effective_control_frequency": _frequency_metric(rollouts, 15.0),

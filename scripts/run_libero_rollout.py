@@ -27,6 +27,7 @@ from smolvla_flow.async_runtime import (
     AsyncClosedLoopController,
     AsyncPolicyServer,
     AsyncRuntimeConfig,
+    GripperHysteresis,
     LeRobotPostprocessorAdapter,
     PreprocessedPolicyAdapter,
     seed_policy_rng,
@@ -246,7 +247,7 @@ def _make_observation_pipeline(task: str):
 def _action_statistics(
     actions: list[np.ndarray],
     *,
-    boundary_stride: int | None = None,
+    sequence_ids: list[int | None] | None = None,
     gripper_index: int = 6,
 ) -> dict[str, float | int | None]:
     if not actions:
@@ -268,11 +269,14 @@ def _action_statistics(
     smoothness = np.abs(np.diff(values, axis=0))
     finite = np.isfinite(values)
     boundary_jumps: list[float] = []
-    if boundary_stride is not None:
-        if not isinstance(boundary_stride, int) or boundary_stride < 1:
-            raise ValueError("boundary_stride must be a positive integer or None")
-        for boundary in range(boundary_stride, len(values), boundary_stride):
-            boundary_jumps.append(float(np.linalg.norm(values[boundary] - values[boundary - 1])))
+    if sequence_ids is not None:
+        if len(sequence_ids) != len(actions):
+            raise ValueError("sequence_ids must align with actions")
+        for boundary in range(1, len(values)):
+            previous_id = sequence_ids[boundary - 1]
+            current_id = sequence_ids[boundary]
+            if previous_id is not None and current_id is not None and current_id != previous_id:
+                boundary_jumps.append(float(np.linalg.norm(values[boundary] - values[boundary - 1])))
     gripper_switch_count = 0
     if 0 <= gripper_index < values.shape[1]:
         gripper_values = values[:, gripper_index]
@@ -307,6 +311,47 @@ def _latency_statistics(values: list[float]) -> dict[str, float | int | None]:
     }
 
 
+def _make_gripper_hysteresis(config: AsyncRuntimeConfig) -> GripperHysteresis:
+    """Build and reset the shared sync/async gripper state machine."""
+
+    gripper = GripperHysteresis(
+        action_index=config.gripper_action_index,
+        low_threshold=config.gripper_low_threshold,
+        high_threshold=config.gripper_high_threshold,
+        polarity=config.gripper_polarity,
+    )
+    gripper.reset()
+    return gripper
+
+
+def _gripper_hysteresis_config(config: AsyncRuntimeConfig) -> dict[str, Any]:
+    """Return the exact gripper postprocessing settings stored in artifacts."""
+
+    return {
+        "action_index": config.gripper_action_index,
+        "low_threshold": config.gripper_low_threshold,
+        "high_threshold": config.gripper_high_threshold,
+        "polarity": config.gripper_polarity,
+    }
+
+
+def _sleep_for_remaining_period(
+    period_seconds: float,
+    tick_started: float,
+    *,
+    clock=time.perf_counter,
+    sleeper=time.sleep,
+) -> float:
+    """Sleep until the target period and return measured sleep duration."""
+
+    requested_seconds = max(0.0, period_seconds - (clock() - tick_started))
+    if requested_seconds <= 0.0:
+        return 0.0
+    sleep_started = clock()
+    sleeper(requested_seconds)
+    return max(0.0, clock() - sleep_started)
+
+
 def _make_env(suite, args: argparse.Namespace, task_id: int, episode_index: int):
     from lerobot.envs.libero import LiberoEnv
 
@@ -336,14 +381,18 @@ def _run_sync_episode(
     prepare_observation,
     seed: int,
     max_steps: int,
+    gripper_polarity: str,
     torch_seed: int | None,
 ) -> dict[str, Any]:
-    from smolvla_flow.async_runtime import LeRobotPostprocessorAdapter
-
     if torch_seed is not None:
         seed_policy_rng(torch_seed)
     policy.reset()
     raw_observation, _ = env.reset(seed=seed)
+    runtime_config = AsyncRuntimeConfig(
+        rtc_enabled=False,
+        gripper_polarity=gripper_polarity,
+    )
+    gripper = _make_gripper_hysteresis(runtime_config)
     postprocess_action = LeRobotPostprocessorAdapter(postprocessor)
     inference_seconds: list[float] = []
     actions: list[np.ndarray] = []
@@ -357,7 +406,8 @@ def _run_sync_episode(
         with torch.inference_mode():
             normalized_action = policy.select_action(batch)
         inference_seconds.append(time.perf_counter() - inference_started)
-        action = postprocess_action(normalized_action.squeeze(0)).numpy().astype(np.float32)
+        normalized_action = gripper.apply(normalized_action.squeeze(0))
+        action = postprocess_action(normalized_action).numpy().astype(np.float32)
         actions.append(action.copy())
         raw_observation, reward, terminated, truncated, info = env.step(action)
         reward_sum += float(reward)
@@ -379,6 +429,7 @@ def _run_sync_episode(
         "initial_warmup_seconds": None,
         "policy_requests": len(inference_seconds),
         "inference": _latency_statistics(inference_seconds),
+        "gripper_hysteresis": _gripper_hysteresis_config(runtime_config),
         **_action_statistics(actions),
     }
 
@@ -417,6 +468,7 @@ def _run_async_episode(
     )
     action_queue = ActionQueue(overlap_steps=runtime_config.overlap_steps)
     postprocess_action = LeRobotPostprocessorAdapter(postprocessor)
+    gripper = _make_gripper_hysteresis(runtime_config)
 
     with torch.inference_mode():
         warmup_started = time.perf_counter()
@@ -436,23 +488,32 @@ def _run_async_episode(
         server,
         action_queue,
         runtime_config,
+        gripper=gripper,
         action_postprocessor=postprocess_action,
         simulation_only=False,
     )
     controller.seed_actions(initial_actions)
 
     actions: list[np.ndarray] = []
+    sequence_ids: list[int | None] = []
     inference_seconds: list[float] = []
+    controller_tick_seconds: list[float] = []
+    environment_step_seconds: list[float] = []
+    sleep_seconds: list[float] = []
     waiting_ticks = 0
     held_action_ticks = 0
     last_action: np.ndarray | None = None
+    last_sequence_id: int | None = None
     reward_sum = 0.0
     success = False
     started = time.perf_counter()
+    control_ended = started
+    finalization_seconds = 0.0
     try:
         for _step in range(max_steps):
             tick_started = time.perf_counter()
             tick = controller.tick(raw_observation)
+            controller_tick_seconds.append(time.perf_counter() - tick_started)
             if tick.action is None:
                 waiting_ticks += 1
                 held_action_ticks += 1
@@ -462,25 +523,35 @@ def _run_async_episode(
                 # The tick is still sent to LIBERO so waiting time is measured
                 # instead of truncating the episode at the first queue miss.
                 action = last_action.copy()
+                sequence_id = last_sequence_id
             else:
                 action = tick.action.numpy().astype(np.float32)
                 last_action = action.copy()
+                sequence_id = tick.queue_sequence_id
+                last_sequence_id = sequence_id
             actions.append(action.copy())
+            sequence_ids.append(sequence_id)
+            env_step_started = time.perf_counter()
             raw_observation, reward, terminated, truncated, info = env.step(action)
+            environment_step_seconds.append(time.perf_counter() - env_step_started)
             reward_sum += float(reward)
             success = bool(info.get("is_success", False))
             if bool(terminated or truncated):
                 break
-            elapsed_tick = time.perf_counter() - tick_started
-            if tick_sleep > elapsed_tick:
-                time.sleep(tick_sleep - elapsed_tick)
+            sleep_seconds.append(_sleep_for_remaining_period(tick_sleep, tick_started))
+        control_ended = time.perf_counter()
     finally:
+        if control_ended == started:
+            control_ended = time.perf_counter()
+        finalization_started = time.perf_counter()
         server.wait_for_idle(timeout=30.0)
         events = [event.__dict__ for event in server.events()]
         server_stats = server.stats()
         controller.close()
+        finalization_seconds = time.perf_counter() - finalization_started
 
     elapsed = time.perf_counter() - started
+    control_elapsed = control_ended - started
     inference_seconds = [float(event["elapsed_seconds"]) for event in events if event.get("error") is None]
     return {
         "mode": "async",
@@ -489,12 +560,18 @@ def _run_async_episode(
         "steps": len(actions),
         "reward_sum": reward_sum,
         "elapsed_seconds": elapsed,
-        "effective_control_hz": len(actions) / elapsed if elapsed > 0 else None,
+        "control_elapsed_seconds": control_elapsed,
+        "finalization_seconds": finalization_seconds,
+        "effective_control_hz": len(actions) / control_elapsed if control_elapsed > 0 else None,
         "waiting_ticks": waiting_ticks,
         "held_action_ticks": held_action_ticks,
         "initial_warmup_seconds": warmup_seconds,
         "policy_requests": server_stats["completed"],
         "inference": _latency_statistics(inference_seconds),
+        "controller_tick": _latency_statistics(controller_tick_seconds),
+        "environment_step": _latency_statistics(environment_step_seconds),
+        "control_sleep": _latency_statistics(sleep_seconds),
+        "gripper_hysteresis": _gripper_hysteresis_config(runtime_config),
         "runtime": {
             "control_frequency_hz": runtime_config.control_frequency_hz,
             "chunk_size": runtime_config.chunk_size,
@@ -506,10 +583,11 @@ def _run_async_episode(
             "rtc_execution_horizon": runtime_config.rtc_execution_horizon,
             "gripper_polarity": runtime_config.gripper_polarity,
             "tick_sleep_seconds": tick_sleep,
+            "chunk_boundary_definition": "queue_sequence_transition",
         },
         "server": server_stats,
         "inference_events": events,
-        **_action_statistics(actions, boundary_stride=runtime_config.execute_steps),
+        **_action_statistics(actions, sequence_ids=sequence_ids),
     }
 
 
@@ -555,6 +633,7 @@ def main() -> int:
         "episodes_requested": args.episodes,
         "start_seed": args.start_seed,
         "torch_seed": args.torch_seed,
+        "gripper_polarity": args.gripper_polarity,
     }
     try:
         if args.episodes < 1:
@@ -596,6 +675,7 @@ def main() -> int:
                         prepare_observation,
                         seed,
                         max_steps,
+                        args.gripper_polarity,
                         args.torch_seed,
                     )
                 else:

@@ -54,6 +54,13 @@ def test_evaluate_acceptance_reports_pass_fail_and_unknown() -> None:
         [benchmark],
         fused_rollout=asynchronous,
         unfused_rollout=sync,
+        distillation_metrics=[
+            {
+                "task_index_filter": 34,
+                "sample_count_after_task_index_filter": 9,
+                "sample_count": 9,
+            }
+        ],
     )
 
     assert result["finite_output"]["status"] == "pass"
@@ -76,3 +83,55 @@ def test_evaluate_acceptance_does_not_infer_missing_fields() -> None:
     assert result["waiting_ticks"]["status"] == "unknown"
     assert result["deadline_miss_ratio"]["status"] == "unknown"
     assert result["same_episodes_and_seeds"]["status"] == "unknown"
+
+
+def test_task_isolation_is_unknown_for_legacy_distillation_metrics() -> None:
+    result = evaluate_acceptance(
+        [_rollout("sync", success=True)],
+        distillation_metrics=[{"sample_count": 9}],
+    )
+
+    assert result["task_isolation"]["status"] == "unknown"
+    assert result["task_isolation"]["value"]["observed_task_indices"] == [34]
+    assert result["task_isolation"]["value"]["distillation_evidence"] == []
+
+
+def test_task_isolation_fails_on_filter_or_sample_mismatch() -> None:
+    wrong_task = evaluate_acceptance(
+        [_rollout("sync", success=True)],
+        distillation_metrics=[
+            {
+                "task_index_filter": 7,
+                "sample_count_after_task_index_filter": 9,
+                "sample_count": 9,
+            }
+        ],
+    )
+    wrong_count = evaluate_acceptance(
+        [_rollout("sync", success=True)],
+        distillation_metrics=[
+            {
+                "task_index_filter": 34,
+                "sample_count_after_task_index_filter": 8,
+                "sample_count": 9,
+            }
+        ],
+    )
+
+    assert wrong_task["task_isolation"]["status"] == "fail"
+    assert wrong_count["task_isolation"]["status"] == "fail"
+
+
+def test_task_isolation_allows_max_samples_truncation() -> None:
+    result = evaluate_acceptance(
+        [_rollout("sync", success=True)],
+        distillation_metrics=[
+            {
+                "task_index_filter": 34,
+                "sample_count_after_task_index_filter": 9,
+                "sample_count": 8,
+            }
+        ],
+    )
+
+    assert result["task_isolation"]["status"] == "pass"

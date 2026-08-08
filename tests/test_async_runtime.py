@@ -51,6 +51,21 @@ def test_action_queue_discards_inference_delay_before_blending() -> None:
     )
 
 
+def test_action_queue_exposes_chunk_sequence_transitions() -> None:
+    queue = ActionQueue(overlap_steps=1)
+    seeded = queue.seed(torch.zeros(2, 1))
+
+    first_action, first_sequence = queue.pop_with_sequence()
+    assert first_action is not None
+    assert first_sequence == seeded.sequence_id
+
+    merged = queue.merge(torch.ones(2, 1))
+    second_action, second_sequence = queue.pop_with_sequence()
+    assert second_action is not None
+    assert second_sequence == merged.sequence_id
+    assert second_sequence != first_sequence
+
+
 def test_rtc_action_queue_replaces_without_blending_and_snapshots_original() -> None:
     queue = ActionQueue(overlap_steps=3, rtc_enabled=True)
     queue.seed(torch.zeros(5, 2))
