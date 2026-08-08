@@ -15,6 +15,11 @@ TORCH_SEED="${TORCH_SEED:-123}"
 MAX_STEPS="${MAX_STEPS:-}"
 BENCHMARK_JSON="${BENCHMARK_JSON:-}"
 
+if [[ ! -f "$ADAPTER_PATH" ]]; then
+  echo "missing distilled adapter: $ADAPTER_PATH" >&2
+  exit 2
+fi
+
 export PYTHONPATH="$PROJECT_ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
 mkdir -p "$OUTPUT_DIR"
 
