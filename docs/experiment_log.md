@@ -382,3 +382,39 @@ CUDA 教师预检在 CPU 或无 CUDA 环境下会提前给出清晰错误。已�
 
 验证：`PYTHONPATH=src /opt/anaconda3/bin/python -m pytest -q`，56 项通过；task split
 脚本在仓库元数据上生成了 31/7/7 划分。正式蒸馏和 LIBERO 成功率仍需在完整 GPU 数据上运行。
+
+## 2026-08-08：验收指标自动化与 rollout 可观测性
+
+### 代码变更
+
+`run_libero_rollout.py` 新增以下产物字段：
+
+- `dataset_task_index`，用于检查 rollout 是否使用 task34。
+- `action_finite_count`、`action_nonfinite_count` 和 `action_finite_ratio`。
+- `chunk_boundary_jump_mean` 和 `chunk_boundary_jump_max`，异步模式按每 `execute_steps` 个动作计算边界代理值。
+- `gripper_switch_count`，记录执行动作中夹爪维度的数值变化次数。
+- `held_action_ticks`，队列短暂为空时保持上一条安全动作的 tick 数。
+
+新增 `scripts/evaluate_acceptance_metrics.py` 和 `src/smolvla_flow/evaluation.py`。脚本对验收项输出 `pass`、`fail` 或 `unknown`，旧产物缺少字段时保留证据缺口。蒸馏验证集误差仍要求单独提供蒸馏 2 步和未蒸馏 2 步的验证结果。
+
+### 本机回放历史产物的自动汇总
+
+使用 2026-08-05 的历史同步、异步和 benchmark JSON 运行汇总脚本，结果如下：
+
+| 指标 | 自动判定 | 观察值 |
+| --- | --- | --- |
+| 输出 finite | unknown | 历史 rollout 缺少 `action_finite_ratio`，benchmark 输出 finite |
+| task 隔离 | unknown | 历史 rollout 缺少 `dataset_task_index` |
+| waiting tick | pass | 0 |
+| deadline miss ratio | pass | 0/20 = 0% |
+| 异步有效控制频率 | fail | 最低 8.23 Hz，平均 9.84 Hz |
+| 2 步相对 10 步加速 | pass | 3.10 倍 |
+| 异步成功率下降 | fail | 60% 降到 40%，下降 20 个百分点 |
+| 验证集动作误差 | unknown | 缺少未蒸馏 2 步对照 |
+| chunk 边界跳变 | unknown | 历史 rollout 缺少该字段 |
+| 动作平滑度对照 | fail | RTC 0.0361，高于无 RTC 0.0315 |
+| episode 和 seed 一致性 | unknown | 历史 `torch_seed` 为 `None` |
+
+### 验证结果与限制
+
+当前工作区 `python -m pytest -q` 为 60 项通过。新增指标只完成代码级验证，尚未在修复后的 runtime 上生成新的 GPU rollout。正式验收仍需在 4090 上重新生成同步、RTC 异步和无融合异步结果，并使用完整 task34 数据 shard。

@@ -44,6 +44,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--flow-steps", type=int, default=10)
     parser.add_argument("--suite", default="libero_spatial")
     parser.add_argument("--task-id", type=int, default=0)
+    parser.add_argument(
+        "--dataset-task-index",
+        type=int,
+        default=34,
+        help="expected LeRobot task index for the selected LIBERO task; recorded for isolation checks",
+    )
     parser.add_argument("--task", default=None)
     parser.add_argument("--episodes", type=int, default=1)
     parser.add_argument("--start-seed", type=int, default=0)
@@ -237,21 +243,53 @@ def _make_observation_pipeline(task: str):
     return prepare
 
 
-def _action_statistics(actions: list[np.ndarray]) -> dict[str, float | None]:
+def _action_statistics(
+    actions: list[np.ndarray],
+    *,
+    boundary_stride: int | None = None,
+    gripper_index: int = 6,
+) -> dict[str, float | int | None]:
     if not actions:
         return {
             "action_l2_mean": None,
             "action_abs_mean": None,
             "action_smoothness_mean": None,
             "action_smoothness_max": None,
+            "action_value_count": 0,
+            "action_finite_count": 0,
+            "action_nonfinite_count": 0,
+            "action_finite_ratio": None,
+            "chunk_boundary_count": 0,
+            "chunk_boundary_jump_mean": None,
+            "chunk_boundary_jump_max": None,
+            "gripper_switch_count": 0,
         }
     values = np.stack(actions, axis=0).astype(np.float64)
     smoothness = np.abs(np.diff(values, axis=0))
+    finite = np.isfinite(values)
+    boundary_jumps: list[float] = []
+    if boundary_stride is not None:
+        if not isinstance(boundary_stride, int) or boundary_stride < 1:
+            raise ValueError("boundary_stride must be a positive integer or None")
+        for boundary in range(boundary_stride, len(values), boundary_stride):
+            boundary_jumps.append(float(np.linalg.norm(values[boundary] - values[boundary - 1])))
+    gripper_switch_count = 0
+    if 0 <= gripper_index < values.shape[1]:
+        gripper_values = values[:, gripper_index]
+        gripper_switch_count = int(np.count_nonzero(np.diff(gripper_values) != 0.0))
     return {
         "action_l2_mean": float(np.linalg.norm(values, axis=-1).mean()),
         "action_abs_mean": float(np.abs(values).mean()),
-        "action_smoothness_mean": float(smoothness.mean()) if len(smoothness) else 0.0,
-        "action_smoothness_max": float(smoothness.max()) if len(smoothness) else 0.0,
+        "action_smoothness_mean": float(smoothness.mean()) if len(smoothness) else None,
+        "action_smoothness_max": float(smoothness.max()) if len(smoothness) else None,
+        "action_value_count": int(values.size),
+        "action_finite_count": int(finite.sum()),
+        "action_nonfinite_count": int((~finite).sum()),
+        "action_finite_ratio": float(finite.mean()),
+        "chunk_boundary_count": len(boundary_jumps),
+        "chunk_boundary_jump_mean": float(statistics.fmean(boundary_jumps)) if boundary_jumps else None,
+        "chunk_boundary_jump_max": float(max(boundary_jumps)) if boundary_jumps else None,
+        "gripper_switch_count": gripper_switch_count,
     }
 
 
@@ -337,6 +375,7 @@ def _run_sync_episode(
         "elapsed_seconds": elapsed,
         "effective_control_hz": len(actions) / elapsed if elapsed > 0 else None,
         "waiting_ticks": 0,
+        "held_action_ticks": 0,
         "initial_warmup_seconds": None,
         "policy_requests": len(inference_seconds),
         "inference": _latency_statistics(inference_seconds),
@@ -405,6 +444,8 @@ def _run_async_episode(
     actions: list[np.ndarray] = []
     inference_seconds: list[float] = []
     waiting_ticks = 0
+    held_action_ticks = 0
+    last_action: np.ndarray | None = None
     reward_sum = 0.0
     success = False
     started = time.perf_counter()
@@ -414,8 +455,16 @@ def _run_async_episode(
             tick = controller.tick(raw_observation)
             if tick.action is None:
                 waiting_ticks += 1
-                break
-            action = tick.action.numpy().astype(np.float32)
+                held_action_ticks += 1
+                if last_action is None:
+                    raise RuntimeError("action queue was empty before the first executable action")
+                # Keep the last safe action while the worker refills the queue.
+                # The tick is still sent to LIBERO so waiting time is measured
+                # instead of truncating the episode at the first queue miss.
+                action = last_action.copy()
+            else:
+                action = tick.action.numpy().astype(np.float32)
+                last_action = action.copy()
             actions.append(action.copy())
             raw_observation, reward, terminated, truncated, info = env.step(action)
             reward_sum += float(reward)
@@ -442,6 +491,7 @@ def _run_async_episode(
         "elapsed_seconds": elapsed,
         "effective_control_hz": len(actions) / elapsed if elapsed > 0 else None,
         "waiting_ticks": waiting_ticks,
+        "held_action_ticks": held_action_ticks,
         "initial_warmup_seconds": warmup_seconds,
         "policy_requests": server_stats["completed"],
         "inference": _latency_statistics(inference_seconds),
@@ -459,7 +509,7 @@ def _run_async_episode(
         },
         "server": server_stats,
         "inference_events": events,
-        **_action_statistics(actions),
+        **_action_statistics(actions, boundary_stride=runtime_config.execute_steps),
     }
 
 
@@ -472,6 +522,11 @@ def _aggregate(episodes: list[dict[str, Any]]) -> dict[str, Any]:
         "mean_steps": float(statistics.fmean(item["steps"] for item in episodes)) if episodes else None,
         "mean_reward_sum": float(statistics.fmean(item["reward_sum"] for item in episodes)) if episodes else None,
         "mean_waiting_ticks": float(statistics.fmean(item["waiting_ticks"] for item in episodes)) if episodes else None,
+        "mean_held_action_ticks": float(
+            statistics.fmean(item.get("held_action_ticks", 0) for item in episodes)
+        )
+        if episodes
+        else None,
         "mean_action_smoothness": float(
             statistics.fmean(item["action_smoothness_mean"] for item in episodes if item["action_smoothness_mean"] is not None)
         )
@@ -496,6 +551,7 @@ def main() -> int:
         "flow_steps": args.flow_steps,
         "suite": args.suite,
         "task_id": args.task_id,
+        "dataset_task_index": args.dataset_task_index,
         "episodes_requested": args.episodes,
         "start_seed": args.start_seed,
         "torch_seed": args.torch_seed,
@@ -561,6 +617,8 @@ def main() -> int:
                         args.torch_seed,
                     )
                 episode["torch_seed"] = args.torch_seed
+                episode["task_id"] = args.task_id
+                episode["dataset_task_index"] = args.dataset_task_index
             finally:
                 env.close()
             episode_results.append(episode)

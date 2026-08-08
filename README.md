@@ -166,7 +166,7 @@ python "$PROJECT_ROOT/scripts/run_libero_rollout.py" \
   --output "$PROJECT_ROOT/artifacts/rollout/student_task0_async.json"
 ```
 
-输出会记录成功率、累计 reward、实际控制频率、等待 tick、推理延迟、动作平滑度和异步队列事件。
+输出会记录成功率、累计 reward、实际控制频率、等待 tick、保持上一动作的 tick、推理延迟、动作 finite 计数、固定执行边界跳变、夹爪数值切换次数和异步队列事件。边界跳变只在异步模式按 `execute_steps` 的固定执行间隔统计，同步模式不把逐步重预测当作 chunk 边界。
 
 固定 seed 对照需要让策略采样噪声可复现。`run_libero_rollout.py` 的 `--torch-seed`
 在每个 episode 的首次策略前向处重置 Python、NumPy 和 PyTorch（含 CUDA）RNG，
@@ -195,6 +195,36 @@ python "$PROJECT_ROOT/scripts/run_libero_rollout.py" \
   --assets-dir "$LIBERO_ASSETS_DIR" \
   --output "$PROJECT_ROOT/artifacts/rollout/student_task0_async_fixed.json"
 ```
+
+动作队列的无融合基线需要同时关闭 RTC 和 overlap blend：
+
+```bash
+python "$PROJECT_ROOT/scripts/run_libero_rollout.py" \
+  --mode async \
+  --flow-steps 2 \
+  --adapter "$ADAPTER_PATH" \
+  --episodes 5 \
+  --start-seed 0 \
+  --torch-seed 123 \
+  --disable-rtc \
+  --overlap-steps 0 \
+  --assets-dir "$LIBERO_ASSETS_DIR" \
+  --output "$PROJECT_ROOT/artifacts/rollout/student_task0_async_unfused.json"
+```
+
+用现有产物生成验收指标汇总。脚本对缺少字段的历史 JSON 输出 `unknown`，不会把旧结果自动当作通过：
+
+```bash
+python "$PROJECT_ROOT/scripts/evaluate_acceptance_metrics.py" \
+  --rollout "$PROJECT_ROOT/artifacts/rollout/student_task0_sync_fixed.json" \
+  --rollout "$PROJECT_ROOT/artifacts/rollout/student_task0_async_fixed.json" \
+  --benchmark "$PROJECT_ROOT/artifacts/distillation/task0_dev5_final/benchmark.json" \
+  --fused-rollout "$PROJECT_ROOT/artifacts/rollout/student_task0_async_fixed.json" \
+  --unfused-rollout "$PROJECT_ROOT/artifacts/rollout/student_task0_async_unfused.json" \
+  --output "$PROJECT_ROOT/artifacts/evaluation/acceptance_metrics.json"
+```
+
+异步 rollout 遇到短暂空队列时会记录 waiting tick，并保持上一条已经过后处理的动作继续推进环境。首次动作就缺失会直接报错，避免用零动作掩盖队列初始化问题。
 
 ## 失败记录与实验日志
 
