@@ -391,11 +391,13 @@ CUDA 教师预检在 CPU 或无 CUDA 环境下会提前给出清晰错误。已�
 
 - `dataset_task_index`，用于检查 rollout 是否使用 task34。
 - `action_finite_count`、`action_nonfinite_count` 和 `action_finite_ratio`。
-- `chunk_boundary_jump_mean` 和 `chunk_boundary_jump_max`，异步模式按每 `execute_steps` 个动作计算边界代理值。
+- `chunk_boundary_jump_mean` 和 `chunk_boundary_jump_max`，异步模式只在 `ActionQueue` 的 `queue_sequence_id` 真实切换处统计边界跳变。
 - `gripper_switch_count`，记录执行动作中夹爪维度的数值变化次数。
 - `held_action_ticks`，队列短暂为空时保持上一条安全动作的 tick 数。
+- `control_elapsed_seconds` 和 `finalization_seconds`，把控制循环与 `wait_for_idle()`、`close()` 的推理线程收尾分开记录。异步 `effective_control_hz` 只使用 `control_elapsed_seconds`。
+- `gripper_hysteresis`，记录同步和异步 rollout 共同使用的夹爪迟滞阈值与方向。
 
-新增 `scripts/evaluate_acceptance_metrics.py` 和 `src/smolvla_flow/evaluation.py`。脚本对验收项输出 `pass`、`fail` 或 `unknown`，旧产物缺少字段时保留证据缺口。蒸馏验证集误差仍要求单独提供蒸馏 2 步和未蒸馏 2 步的验证结果。
+新增 `scripts/evaluate_acceptance_metrics.py` 和 `src/smolvla_flow/evaluation.py`。脚本对验收项输出 `pass`、`fail` 或 `unknown`，旧产物缺少字段时保留证据缺口。`task_isolation` 同时检查 rollout 的 `dataset_task_index` 和蒸馏产物的 `task_index_filter`、`sample_count_after_task_index_filter`、`sample_count`。旧的 9-chunk 开发产物缺少完整 task filter 证据，对应指标保持 `unknown`。验收 CLI 通过 `--distillation-metrics` 传入该证据，矩阵脚本通过 `DISTILLATION_METRICS_JSON` 指定。蒸馏验证集误差仍要求单独提供蒸馏 2 步和未蒸馏 2 步的验证结果。
 
 新增 `scripts/run_acceptance_matrix.sh`，在 GPU 主机上用同一组 episode seed 和 `torch_seed` 依次运行原生教师、未蒸馏 2 步、蒸馏 2 步同步、RTC 异步和无融合异步。无融合路径显式使用 `--disable-rtc --overlap-steps 0`，避免把 overlap blend 结果误当作直接切换基线。
 
@@ -406,7 +408,7 @@ CUDA 教师预检在 CPU 或无 CUDA 环境下会提前给出清晰错误。已�
 | 指标 | 自动判定 | 观察值 |
 | --- | --- | --- |
 | 输出 finite | unknown | 历史 rollout 缺少 `action_finite_ratio`，benchmark 输出 finite |
-| task 隔离 | unknown | 历史 rollout 缺少 `dataset_task_index` |
+| task 隔离 | unknown | 历史 rollout 缺少 `dataset_task_index`，旧 9-chunk 蒸馏产物也缺少完整 task filter 证据 |
 | waiting tick | pass | 0 |
 | deadline miss ratio | pass | 0/20 = 0% |
 | 异步有效控制频率 | fail | 最低 8.23 Hz，平均 9.84 Hz |
@@ -417,6 +419,56 @@ CUDA 教师预检在 CPU 或无 CUDA 环境下会提前给出清晰错误。已�
 | 动作平滑度对照 | fail | RTC 0.0361，高于无 RTC 0.0315 |
 | episode 和 seed 一致性 | unknown | 历史 `torch_seed` 为 `None` |
 
+表中的异步有效控制频率来自旧产物，其计时范围包含策略线程收尾。该数值只保留为历史诊断，后续验收需要用 `control_elapsed_seconds` 口径重新生成，不能与修正后的频率直接比较。
+
 ### 验证结果与限制
 
-当前工作区 `python -m pytest -q` 为 60 项通过。新增指标只完成代码级验证，尚未在修复后的 runtime 上生成新的 GPU rollout。正式验收仍需在 4090 上重新生成同步、RTC 异步和无融合异步结果，并使用完整 task34 数据 shard。
+这一段记录 v2 重跑前的状态。当前工作区 `python -m pytest -q` 当时为 60 项通过。新增指标只完成代码级验证，尚未在修复后的 runtime 上生成新的 GPU rollout。后续 v2 实跑结果记录在下一节。正式验收仍需使用完整 task34 数据 shard 补齐 task isolation 与验证集动作误差证据。
+
+## 2026-08-08：4090 验收矩阵 v2
+
+### 运行配置
+
+- 代码版本：commit `8e765b3`。
+- 五组配置各运行 5 个 episode。
+- LIBERO 环境 seed：0、1、2、3、4。
+- 策略采样 seed：每组均为 `torch_seed=123`。
+- 异步频率按 `control_elapsed_seconds` 计算。
+- chunk 边界按 `ActionQueue` 的 `queue_sequence_id` 真实切换统计。
+- 同步和异步执行相同的夹爪迟滞处理。
+
+旧目录 `artifacts/rollout/current_seed123/` 使用修复前的计时和固定间隔边界口径，只保留为历史诊断。本轮验收使用 `artifacts/rollout/current_seed123_v2/`。
+
+### 五组 rollout 结果
+
+| 配置 | 成功 | 平均有效控制频率 | 加权推理时间 | 动作平滑度 | chunk 边界跳变 |
+| --- | --- | --- | --- | --- | --- |
+| 原生 10 步同步 | 2/5 | 2.2747 Hz | 0.336855 s | 未汇总 | 同步模式不统计 |
+| 未蒸馏 2 步同步 | 2/5 | 4.5014 Hz | 未汇总 | 0.108869 | 同步模式不统计 |
+| 蒸馏 2 步同步 | 2/5 | 4.4912 Hz | 0.120013 s | 0.102839 | 同步模式不统计 |
+| 蒸馏 2 步 RTC 异步 | 2/5 | 平均 10.3262 Hz，最低 8.5247 Hz | 按异步事件单独记录 | 0.043320 | 0.285086 |
+| 蒸馏 2 步无融合异步 | 3/5 | 10.0928 Hz | 按异步事件单独记录 | 0.040253 | 0.635285 |
+
+RTC 异步组的 waiting tick 为 0，deadline miss 为 0/25。微基准给出的 2 步相对 10 步加速为 3.1015 倍。本轮同步 rollout 的加权推理时间从 0.336855 s 降到 0.120013 s，对应 2.8068 倍。
+
+### 自动验收结果
+
+| 指标 | 判定 | v2 证据 |
+| --- | --- | --- |
+| 输出 finite | pass | rollout finite ratio 为 100%，benchmark 教师与学生输出 finite |
+| task 隔离 | unknown | rollout 为 task34，旧 9-chunk 蒸馏产物缺少完整 task filter 证据 |
+| waiting tick | pass | 0 |
+| deadline miss ratio | pass | 0/25 |
+| 异步有效控制频率 | fail | 最低 8.5247 Hz，平均 10.3262 Hz，目标至少 15 Hz |
+| 2 步相对 10 步加速 | pass | 微基准 3.1015 倍，目标至少 2.5 倍 |
+| 异步成功率下降 | pass | 同步 2/5，RTC 异步 2/5，下降 0 个百分点 |
+| 验证集动作误差 | unknown | 缺少固定验证集上的蒸馏 2 步与未蒸馏 2 步误差 |
+| chunk 边界跳变 | pass | RTC 0.285086，小于无融合 0.635285 |
+| 全局逐步动作平滑度 | fail | RTC 0.043320，高于无融合 0.040253 |
+| episode 和 seed 一致性 | pass | 两组均使用 episode seed 0 到 4 与 `torch_seed=123` |
+
+### 结果解释
+
+RTC 将真实队列切换边界的平均跳变从 0.635285 降到 0.285086，改善约 55.1%。全局逐步动作平滑度略差，说明边界融合的收益集中在新旧 chunk 切换处，尚未降低整条轨迹每一步的平均变化。
+
+异步控制循环中，单次 LIBERO `env.step` 约为 86 到 115 ms，控制周期剩余 sleep 为 0。15 Hz 要求每次控制步在约 66.7 ms 内完成，当前同进程仿真环境已经超过该预算。后续频率优化需要单独处理仿真步进开销，或把环境执行与策略服务拆到不同进程后重新测量。

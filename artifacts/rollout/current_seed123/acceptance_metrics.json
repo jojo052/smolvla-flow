@@ -1,0 +1,159 @@
+{
+  "rollouts": [
+    "<remote-project-current>/artifacts/rollout/current_seed123/distilled_two_step_sync.json",
+    "<remote-project-current>/artifacts/rollout/current_seed123/distilled_two_step_async_rtc.json"
+  ],
+  "benchmarks": [
+    "<remote-project>/artifacts/distillation/task0_dev5_final/benchmark.json"
+  ],
+  "fused_rollout": "<remote-project-current>/artifacts/rollout/current_seed123/distilled_two_step_async_rtc.json",
+  "unfused_rollout": "<remote-project-current>/artifacts/rollout/current_seed123/distilled_two_step_async_unfused.json",
+  "target_task_index": 34,
+  "metrics": {
+    "finite_output": {
+      "status": "pass",
+      "value": {
+        "rollout_min_ratio": 1.0,
+        "benchmark_outputs": [
+          true,
+          true
+        ]
+      },
+      "target": 1.0
+    },
+    "task_isolation": {
+      "status": "pass",
+      "value": {
+        "observed_task_indices": [
+          34
+        ]
+      },
+      "target": 34
+    },
+    "waiting_ticks": {
+      "status": "pass",
+      "value": {
+        "waiting_ticks": 0,
+        "steps": 1962
+      },
+      "target": 0
+    },
+    "deadline_miss_ratio": {
+      "status": "pass",
+      "value": {
+        "misses": 0,
+        "events": 21,
+        "ratio": 0.0
+      },
+      "target": 0.01
+    },
+    "effective_control_frequency": {
+      "status": "fail",
+      "value": {
+        "minimum_hz": 8.491672357508698,
+        "mean_hz": 9.870611724506967,
+        "per_episode_hz": [
+          8.491672357508698,
+          11.11494559664105,
+          11.399380497065394,
+          9.691172195728235,
+          8.655887975591458
+        ]
+      },
+      "target": 15.0
+    },
+    "two_step_speedup": {
+      "status": "pass",
+      "value": {
+        "speedups": [
+          3.1015324457373423
+        ],
+        "minimum": 3.1015324457373423
+      },
+      "target": 2.5
+    },
+    "async_success_drop": {
+      "status": "pass",
+      "value": {
+        "sync_success_rate": 0.4,
+        "async_success_rate": 0.6,
+        "drop_percentage_points": -19.999999999999996
+      },
+      "target": 5.0
+    },
+    "validation_action_error": {
+      "status": "unknown",
+      "value": null,
+      "target": "distilled < undistilled",
+      "detail": "requires held-out validation errors for distilled and undistilled 2-step models"
+    },
+    "chunk_boundary_jump": {
+      "status": "pass",
+      "value": {
+        "fused": 0.20446583841482907,
+        "unfused": 0.22722838542760063
+      },
+      "target": "fused < unfused"
+    },
+    "action_smoothness": {
+      "status": "fail",
+      "value": {
+        "fused": 0.0416548232040417,
+        "unfused": 0.0404244452515927
+      },
+      "target": "fused < unfused"
+    },
+    "same_episodes_and_seeds": {
+      "status": "pass",
+      "value": {
+        "signatures": [
+          [
+            [
+              0,
+              123
+            ],
+            [
+              1,
+              123
+            ],
+            [
+              2,
+              123
+            ],
+            [
+              3,
+              123
+            ],
+            [
+              4,
+              123
+            ]
+          ],
+          [
+            [
+              0,
+              123
+            ],
+            [
+              1,
+              123
+            ],
+            [
+              2,
+              123
+            ],
+            [
+              3,
+              123
+            ],
+            [
+              4,
+              123
+            ]
+          ]
+        ]
+      },
+      "target": "same"
+    }
+  }
+}

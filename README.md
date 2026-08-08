@@ -10,22 +10,38 @@
 | task0 固定划分 | 已实现脚本 | 45 个 episode 可生成 31/7/7 train/validation/test，完整窗口数按 `sample_stride=4` 统计 |
 | task0 蒸馏数据 | 开发诊断 | 当前记录只有 9 个完整的 50 帧 chunk |
 | 10 → 5 → 2 蒸馏 | 已完成开发链路 | 每阶段 50 次更新的结果只用于诊断，不能代表正式质量 |
-| 固定 seed=123 同步对照 | 历史 3/5 | 2 步蒸馏学生，5 个 episode；需用当前 `--torch-seed` 重新生成 |
-| 固定 seed=123 异步对照 | 历史 2/5 | 无 RTC 和 RTC replace 两种队列实验均为 2/5；需用当前 `--torch-seed` 重新生成 |
+| 固定 seed=123 同步对照 | v2 已完成 | 原生 10 步、未蒸馏 2 步、蒸馏 2 步均为 2/5 |
+| 固定 seed=123 异步对照 | v2 已完成 | RTC 为 2/5，无融合队列为 3/5 |
 | ACT | 未完成 | 100 step 冒烟和 LIBERO episode 尚未运行 |
 | Diffusion Policy | 未完成 | 100 step 冒烟和 LIBERO episode 尚未运行 |
-| 多 seed 评测 | 未完成 | 还没有固定验证集上的完整多 seed 结果 |
+| 多 seed 评测 | 首轮环境 seed 已完成 | 已覆盖 episode seed 0 到 4，策略采样只覆盖 `torch_seed=123` |
 | 正式评测 | 未完成 | 尚未形成可报告的 LIBERO 成功率和统计区间 |
 
 已有结果表明运行时链路可以执行完整的 LIBERO 交互，但当前蒸馏数据量和评测覆盖范围不足以判断模型质量。实验记录见 [docs/experiment_log.md](docs/experiment_log.md)。
+
+### 2026-08-08 v2 验收矩阵
+
+本轮使用 commit `8e765b3`。五组配置各运行 5 个 episode，环境 seed 为 0 到 4，策略采样固定 `torch_seed=123`。
+
+| 配置 | 成功率 | 平均控制频率 | 推理或动作指标 |
+| --- | --- | --- | --- |
+| 原生 10 步同步 | 2/5 | 2.2747 Hz | 加权推理时间 0.336855 s |
+| 未蒸馏 2 步同步 | 2/5 | 4.5014 Hz | 动作平滑度 0.108869 |
+| 蒸馏 2 步同步 | 2/5 | 4.4912 Hz | 加权推理时间 0.120013 s，动作平滑度 0.102839 |
+| 蒸馏 2 步 RTC 异步 | 2/5 | 平均 10.3262 Hz，最低 8.5247 Hz | waiting 0，deadline miss 0/25，边界跳变 0.285086，动作平滑度 0.043320 |
+| 蒸馏 2 步无融合异步 | 3/5 | 10.0928 Hz | 边界跳变 0.635285，动作平滑度 0.040253 |
+
+自动验收中，finite、waiting tick、deadline、2 步加速、异步成功率下降、chunk 边界跳变和相同 episode/seed 通过。task isolation 与验证集动作误差为 `unknown`。控制频率与全局逐步动作平滑度未通过。微基准的 2 步加速为 3.1015 倍，本轮同步请求的加权推理时间加速为 2.8068 倍。
+
+RTC 将真实队列切换边界的平均跳变降低约 55.1%，其全局逐步平滑度 0.043320 略高于无融合队列的 0.040253。同进程 LIBERO 的单次 `env.step` 为 86 到 115 ms，控制循环可用 sleep 为 0，因此当前链路无法达到 15 Hz。旧 `artifacts/rollout/current_seed123/` 使用修复前的边界与计时口径，只保留为历史诊断；v2 才用于本轮验收。
 
 ## TODO
 
 1. 在 GPU 环境运行固定划分脚本，确认完整 parquet 数据与 31/7/7 episode manifest 一致。
 2. 增加蒸馏更新步数，固定验证 chunk 和随机种子，报告动作 MSE、MAE、轨迹误差和有限值检查。
 3. 完成 ACT 与 Diffusion Policy 的 100 step 冒烟训练，再接入相同的 LIBERO episode 划分。
-4. 运行原生 10 步教师、未蒸馏少步教师和蒸馏学生的多 seed 同步对照。
-5. 运行异步队列、RTC、控制频率和动作平滑度的多 seed 对照，单独记录 deadline miss 和 waiting tick。
+4. 在已完成的 env seed 0 到 4 同步矩阵基础上，增加多个 `torch_seed` 和统计区间。
+5. 在已完成的 RTC 与无融合异步对照基础上，拆分 `env.step` 开销并重新评估 15 到 20 Hz 控制目标，继续单独记录 deadline miss 和 waiting tick。
 6. 确认夹爪正负方向、动作插值和安全保持动作，再开始正式 LIBERO 评测。
 
 ## 可复现实验
@@ -166,7 +182,9 @@ python "$PROJECT_ROOT/scripts/run_libero_rollout.py" \
   --output "$PROJECT_ROOT/artifacts/rollout/student_task0_async.json"
 ```
 
-输出会记录成功率、累计 reward、实际控制频率、等待 tick、保持上一动作的 tick、推理延迟、动作 finite 计数、固定执行边界跳变、夹爪数值切换次数和异步队列事件。边界跳变只在异步模式按 `execute_steps` 的固定执行间隔统计，同步模式不把逐步重预测当作 chunk 边界。
+输出会记录成功率、累计 reward、实际控制频率、等待 tick、保持上一动作的 tick、推理延迟、动作 finite 计数、真实队列 chunk 边界跳变、夹爪数值切换次数和异步队列事件。异步模式为每次 `ActionQueue.merge()` 生成 `queue_sequence_id`，相邻执行动作的 `queue_sequence_id` 发生变化时才统计一次 chunk 边界跳变。同步模式没有动作队列，不把逐步重预测当作 chunk 边界。
+
+同步和异步 rollout 使用同一套夹爪迟滞状态机、阈值和方向设置，并把 `gripper_hysteresis` 配置写入结果。异步 `effective_control_hz` 使用 `control_elapsed_seconds` 计算，只覆盖控制循环；`wait_for_idle()` 和 `close()` 的推理线程收尾耗时保留在总 `elapsed_seconds` 与 `finalization_seconds` 中，不计入有效控制频率。
 
 固定 seed 对照需要让策略采样噪声可复现。`run_libero_rollout.py` 的 `--torch-seed`
 在每个 episode 的首次策略前向处重置 Python、NumPy 和 PyTorch（含 CUDA）RNG，
@@ -219,10 +237,13 @@ python "$PROJECT_ROOT/scripts/evaluate_acceptance_metrics.py" \
   --rollout "$PROJECT_ROOT/artifacts/rollout/student_task0_sync_fixed.json" \
   --rollout "$PROJECT_ROOT/artifacts/rollout/student_task0_async_fixed.json" \
   --benchmark "$PROJECT_ROOT/artifacts/distillation/task0_dev5_final/benchmark.json" \
+  --distillation-metrics "$PROJECT_ROOT/artifacts/distillation/task0_task34/distillation_metrics.json" \
   --fused-rollout "$PROJECT_ROOT/artifacts/rollout/student_task0_async_fixed.json" \
   --unfused-rollout "$PROJECT_ROOT/artifacts/rollout/student_task0_async_unfused.json" \
   --output "$PROJECT_ROOT/artifacts/evaluation/acceptance_metrics.json"
 ```
+
+`task_isolation` 同时要求 rollout episode 的 `dataset_task_index=34`，以及蒸馏产物包含一致的 `task_index_filter`、`sample_count_after_task_index_filter` 和 `sample_count`。旧的 9-chunk 开发产物没有完整 task filter 证据，汇总时会得到 `unknown`，不能作为 task0 数据零混入的证明。
 
 异步 rollout 遇到短暂空队列时会记录 waiting tick，并保持上一条已经过后处理的动作继续推进环境。首次动作就缺失会直接报错，避免用零动作掩盖队列初始化问题。
 
@@ -233,6 +254,7 @@ export PROJECT_ROOT="$HOME/projects/smolvla-flow/project"
 export ADAPTER_PATH="$PROJECT_ROOT/artifacts/distillation/task0_dev5_final/student_2_action_expert.pt"
 export LIBERO_ASSETS_DIR="$HOME/.cache/libero/assets"
 export BENCHMARK_JSON="$PROJECT_ROOT/artifacts/distillation/task0_dev5_final/benchmark.json"
+export DISTILLATION_METRICS_JSON="$PROJECT_ROOT/artifacts/distillation/task0_task34/distillation_metrics.json"
 bash "$PROJECT_ROOT/scripts/run_acceptance_matrix.sh"
 ```
 
