@@ -1,0 +1,10 @@
+{
+  "version": "s1-rtc-realtime-v1",
+  "suites": {"libero_spatial": 220, "libero_object": 280, "libero_goal": 300, "libero_10": 520},
+  "tasks": [0, 5], "initial_states": [20, 21, 22, 23, 24], "check_initial_state": 13,
+  "seed": 123, "control_hz": 20, "settle_ticks": 10, "chunk_size": 50,
+  "flow_steps": 1, "execute_steps": 10, "modes": ["sync", "async", "rtc"],
+  "delays_ms": [0, 100], "guidance_weight": 10.0, "schedule": "EXP",
+  "execution_horizon": 10, "max_lateness_s": 0.005, "max_late_fraction": 0.05,
+  "waiting_action": "zero_motion_last_environment_gripper", "batch": 1, "environments": 1
+}

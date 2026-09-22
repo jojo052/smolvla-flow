@@ -34,13 +34,13 @@ class NonFiniteTensorError(ValueError, FloatingPointError):
     """Raised when a distillation input, model output, or loss is non-finite."""
 
 
-SUPPORTED_STEP_TRANSITIONS: tuple[tuple[int, int], ...] = ((10, 5), (5, 2))
+SUPPORTED_STEP_TRANSITIONS: tuple[tuple[int, int], ...] = ((10, 5), (5, 2), (2, 1))
 
 
 def validate_step_transition(teacher_steps: int, student_steps: int) -> None:
     """Reject unsupported progressive-distillation stages.
 
-    The first project version has two explicit stages.  In particular, a
+    The original stages and the independent 2-to-1 experiment are allowed. A
     direct 10-to-2 jump is rejected so that every 2-step model is initialized
     from the already distilled 5-step teacher.
     """

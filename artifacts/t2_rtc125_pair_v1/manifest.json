@@ -1,0 +1,2014 @@
+{
+  "protocol": {
+    "version": "s1-rtc-realtime-v1",
+    "suites": {
+      "libero_spatial": 220,
+      "libero_object": 280,
+      "libero_goal": 300,
+      "libero_10": 520
+    },
+    "tasks": [
+      0,
+      5
+    ],
+    "initial_states": [
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "check_initial_state": 13,
+    "seed": 123,
+    "control_hz": 20,
+    "settle_ticks": 10,
+    "chunk_size": 50,
+    "flow_steps": 2,
+    "execute_steps": 10,
+    "modes": [
+      "async",
+      "rtc"
+    ],
+    "delays_ms": [
+      0,
+      100
+    ],
+    "guidance_weight": 1.25,
+    "schedule": "EXP",
+    "execution_horizon": 10,
+    "max_lateness_s": 0.005,
+    "max_late_fraction": 0.05,
+    "waiting_action": "zero_motion_last_environment_gripper",
+    "batch": 1,
+    "environments": 1
+  },
+  "tasks": [
+    {
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "name": "pick_up_the_black_bowl_between_the_plate_and_the_ramekin_and_place_it_on_the_plate",
+      "language": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+      "bddl_sha256": "9b59eb1287802868ad9bc78d58e6d36d4ba31134e679cfdbdf4b0feb660c959b",
+      "init_file_sha256": "cbbc73792ce546c9bec181fd328a411d3183074840b282671dee481511381d0a",
+      "state_sha256": [
+        "4e3eaf7a315bc3bafb6db4837c8eef0e5f8aea717782a2a3ea33139392d966ed",
+        "6c2936dc25a97728b811f9db579687d011cbd231d5472e985775a67ca9892cf8",
+        "a5d4b6d871eb48c276a3fc8499e1429ec1c59df278466aa82de44a93260087a0",
+        "c12064bdc97da3ba4ca3675548ba9c76ed096ea772bbec9ca9422628c41b1588",
+        "63dbd6b627e35e377a62f3e791055bc9051a74cab6fef9eadce7892671160536",
+        "c9c2f8022034e9a0705daab34a7f5bf9947ac939dfc5cf5a0ab493a377028a02",
+        "784dba596f01025199c62c3e262748c68f1f3b6ff92df2fd36aab8b5263bc0ce",
+        "d297dd693cb3e13a607d16f211730e28c50b463f597f066ef2a424a8a036186c",
+        "3f628d77bb395ff9ff2b248e18e5dea19d9b1103ed48b55df4eafa29188bd9f0",
+        "6ccefe4bd69954c98ddc32f1acdcff81b5a66ed4304391089bbc027172b66d64",
+        "f6ce6f7f25326bedc23933bb436b5f6eb4810cef61184635c75395e557e1808f",
+        "f9b377d4c4ca5e3bef55b3eff2599229c22f2d944cd5df22c9a8b68882d9dc11",
+        "504db0289ad1061538940e63d39bcfc82bf536dbf5f9083a1692a0e3a2852d79",
+        "2fd168faf38ffee7943a97f4f9589b8e4ed4acb89670c3004a6541dcc4925bc6",
+        "a695298e9ef752b05e4d30c817ab1e2061a6136d65242dac7a2cce63f858b9fd",
+        "51f7d2ae92042fec16a54dd5cd6823eac63f9c096a04bae00a5ec737d8db2cd8",
+        "db2c9ab25c6b23526efa6be860e4bd8330fab9a84131628f2dea6fe4062f993d",
+        "cf9d2825f843308d0880ee0d5e3099a43ae2395e616351f6bae4c046dd50198a",
+        "1f130e9178c4924cf8d24e175c2f0573a5e089299ddf6984b71265abf65bd4e0",
+        "18f349fb4d8b52566befcd2a80723d533717d8dd5dada90ecd7721d512b65e32",
+        "79a03d1a76b0b6beb5e3ac797dc63dcd4f8deda96cc70100fd352bf02b8b62b1",
+        "05b91b73c5da09660bb91c279b9ed5a13be98f07fdf979ecda0ec92640d9e331",
+        "e7a1daaec3d35b65f3dbc4b7b981500c8247a321d3c1fea60f245589d7fcc345",
+        "79cdb8ea384ce01c24d656b80a89d1dff625fc8259e77b68d4e206df1c397939",
+        "58fff4a2c49c751e36ac3b459a980c981c8eee95ff4bf8b51fa3f778d8caf6c5",
+        "270c59a4982faf1124a068e1ede6ed6a2e2c4b782d6662152853c8b37308a777",
+        "abcb7b355a728397586ea87e3ff7a8922f27d1ce87137cbb7fad7519c1c8da0b",
+        "87a5c5b1f34db4f44115b14420e64b69ce42fb10bdff86f6fa7d3082cea7030a",
+        "9af4a846b8a8625eabd163110d717eb1cf99be156cae4a8ea5f8eb55b6a7b7ae",
+        "aee904d9b1ab6993ed2d44907c9c93aa6d66f37bc12863a849e8f1608c824304",
+        "60373ae3ea0f921f6e0e7ad9b70c93086584c0e40e2c729d198ac04e6f4741d1",
+        "dca9d9879195a74cffd26499d9ff1d6f566adaf1dbc1b9abe412d55d8e9c1782"
+      ],
+      "max_steps": 220
+    },
+    {
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "name": "pick_up_the_black_bowl_on_the_ramekin_and_place_it_on_the_plate",
+      "language": "pick up the black bowl on the ramekin and place it on the plate",
+      "bddl_sha256": "10239815a9d18ad53e09365d453a362ee54d29ca276e04eef411cf1db8d72940",
+      "init_file_sha256": "2d2c50b7dcbf861fffa94d576f217ed34153e57487010d7a109a220d4d97189b",
+      "state_sha256": [
+        "63f019944e240d60a5770936f1eaa3853e38bbfeb1c26c987826fb004ed4346c",
+        "7e74f7975ea3899ecb94c8bee1f302127d74c600d13393826d7537db89bf9cc1",
+        "56ae454858e60cf316c3e75237109ba85d8808ab2ef57108c3f9b96c1e839ff3",
+        "316d2aba39523fa1219e5fd61ee263535f5d42fa5b34541af5397ddbb4de0f9f",
+        "b41c19206da1db4e005476e6a4c4e077a5511aaa69cf52614dc483a9bd53773c",
+        "8a66e26dcb5684fb06268d8558ec89cb48b496d3ba03c491d620ac3d37bba6ba",
+        "a9b966c9cf9cc8d424d7ae20f2e72e57c828aef13f172c2643fa7f7d3b194181",
+        "987aabd844775a9b57c09e65ce787dcc8b38ef6f8b0c5565dbd48c83ba6ced2f",
+        "d6c4a596a6f3f6e5bb1b2366f1a4598afaca8d263b0a4e50652479a1ee117ed7",
+        "b97e853cb653df09c54d36b06bd56c40dff4222ea2f6c4a01d6847e1a9b607eb",
+        "bfaff55ad30b79eb4f16c1791d3353527b55561b017b783ffc10277aa26494e0",
+        "ff39aa05adeb3467ae4e7003d9b14f9f9d307101ecb6ef43d415020975ee3ba8",
+        "1035069b81bb91a6134b4ca623b29076df3a99387db6110fabbe0b7aa70d5437",
+        "3731069406dc50d234dfc8e8cdff9b2a4e2e00970ebd0d000af7dea9884a4236",
+        "a5932cf3fc7c1839b68d324f8e724108874c30a15b7936c821543aaff18663a6",
+        "a4deab6566eeb86430ab9f1e5f4f8167ab666fecaf318188b9ce5f5d15999921",
+        "7230223d3b36c289be0dc4cfbfe916bfe65e2b20c4755b123504b97f9db19e76",
+        "6fd8ad771d6691f57d4512a8036552c7b7f13cc92730d96e1fe04cf10f19f622",
+        "bae20d83cc8f5698c74606627590ca7a468ddfcefb40d2b14e88f856ead59dac",
+        "abdc5421f4dbbe198b856e56c8808bb94de1984fbc206990666daac8c48b94f9",
+        "7a3297ec1b170ec45b15af3de0e9ea7980bc479cc017842d7e5d66b3362b2134",
+        "87f12a540d751c063931039d6c667170d2175b401711b1dafd44f04a4cce37fb",
+        "ee8e4157331954c562a92ace1d7af51fb0099876a4eaa5ff8926374864c8164f",
+        "bbef69f5116f7dfa488cfd39df356f328a5ba440318fcbbaf9e3ae64a27fe76f",
+        "8999f5cec79ff0e9ea8952dd394f2d21a9f8b9f2243f389090d970761ba500ce",
+        "d8d91e52f2e9ca98ebb9fd1b3b7978404fb3bdfad0308e35a45cfa59808e184b",
+        "641c9a051b6e04f34c64fbdfa8f3a9f26f1a88d2f0bd175c75f9e0065ae40258",
+        "36966af29d69349d848a32aa0591e7740293629fed04712075b4169eadda314c",
+        "128214cd1fbbedd86b42babf956c09b574fcd7954fcf00e0b0d3842cfe385d31",
+        "07d76b98db72ec16f25ac6ae0bb5be5c828d8b744e208014233e5130dcf74133",
+        "64154536615a439824870c8cf64e89398b68ef06f23a5fd4a530e65cb8cfb0b0",
+        "b35f68c7d99cca813baf26e7221b52e2797fec4bcbcedfcf6ac8951171ccf6f2"
+      ],
+      "max_steps": 220
+    },
+    {
+      "suite": "libero_object",
+      "task_id": 0,
+      "name": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+      "language": "pick up the alphabet soup and place it in the basket",
+      "bddl_sha256": "df088984da13131f8332ee0f13a7896c6a97afd02ee5007a42e8fc5e0893571e",
+      "init_file_sha256": "b9023e5546b239cacb2aaa3c76df3b73c3de6f97500fea5e27a0db9827002a19",
+      "state_sha256": [
+        "6cd4976519943bdc84677396a6e2942e9816ae87e56fc72943914e147f9b6e1e",
+        "2fe669827623c130cb212d851d2ac5189aa22d888856b2c056ee744b2b698bcc",
+        "062dc4b945081bf31237b402969b8503a99fda3500b396d3fe98449c8872dfd4",
+        "01cbc7824b55a08fadaa6fb0397f43a3baf0ebdb90f25ec7d1d3db51313c4e94",
+        "ccf1b9956a832c5ba7e57eed974483435a70a1e7ab668b172a5555c75933abfe",
+        "5c2dd7b336c4b24847a71bddd11564db8cf57a2b1f3df5a00089be4965bd04dd",
+        "00807a6ba9dbbac9b3b21e413ce7301c65bd69a2bb392f87c45f5013a0cacfc7",
+        "b547d4ec9158ada6e317f0271636f20c0b2ea8fd222d07e943cb49c98929ed0a",
+        "706ad2dac4ccce35cf8f5ec117bcad7ba3ae44e8866bb359c8fdaef470ed1e65",
+        "3668c3fb4286512ee868fdc5db8223e6fa7125484974299225c3a87b37759f40",
+        "db1157060364126f485ec72336669c8ab119a27a69be29f796651e566bb5e135",
+        "2d7410b681304c76edebf950c130037768d499717ce9ebfabc639ab3e98c7960",
+        "b70f0c5d5ddc8e8421a7d2c11b2b95c6f543985212af554cfd09d4c80393e035",
+        "4b8d68a05c5818d5000f9a4332ec12ae80e873ed18a8d9c2840d594528ede753",
+        "b965d8251010abba0145c220fd40f0b8203ff40cb6a66cca9918a4a96d4c7325",
+        "f12659156f8c6f9a1559d827b85373393b5c87b0a41ae92bf7f8f82f4226ba1d",
+        "9ade57d423e7ee919048d4fb9a66c75621d8d74a28d7eeba720deb6779ff39be",
+        "a7ba668876969e5b288a5c905bcc0390d92a256226d01cd489cc2d7d6c11f301",
+        "3c7ee515bfd2e5801ca90734242627b4aa23f86bf919b3703dcca00650d2b873",
+        "2f7259155f6b6c52ae7718df37ebcbd0c0bd6ca13205bc146b68c915000bc83c",
+        "7c7358a38e6fc56133866dd23f67640d000de848fb4d22638b545d81c042010b",
+        "bfbff8c583f7d1d53d463048d37c3175319b8647dcae9fc07abb28349b627df2",
+        "149eaf704c907959be1fce2adf4e2b99b84637e003a30c605ae0aeca4a316c5e",
+        "8fd92503e6ba920f10f66e724176f0b55c26bcc9395be1046ac179e03bf7b317",
+        "31f9a9249bb9d878c1a5023b8c3e8a9282101cbd8a6a4889b19245c65d87472b",
+        "a6fee7c621bd66fe9d4ccf7de6584332d39ba7c032724ea1b0c2022e703fa913",
+        "282e06541522f4ac1e000838f99aaf99bc52d401efd5846cbc57256616146230",
+        "2516ee09e5f644ed1ed94d3127a621812dcdf1684ac5f88c01634596b6b279d5",
+        "61587778aab1ad73ebbc6aed50cb75d8d486324e543e0180e16b452009dd3428",
+        "61647642f5497e4bc4b729dacfb28408921690f2d9ab9b46458ccd0b7f6901c9",
+        "e3a4ad0a1b3d76a6a7615ca6e2276167a9514cd88bc92c96093827e2579e33ed",
+        "8755df9e475fa7fbe2091a2428875e2ba15cc54b3991f0a34b0ba7776c60b5a1"
+      ],
+      "max_steps": 280
+    },
+    {
+      "suite": "libero_object",
+      "task_id": 5,
+      "name": "pick_up_the_tomato_sauce_and_place_it_in_the_basket",
+      "language": "pick up the tomato sauce and place it in the basket",
+      "bddl_sha256": "b1f4bb69d256a05f693838de46182bb0d3de0de68eec350df1b5b1e76f6c136d",
+      "init_file_sha256": "2326da7ccacd3ebc75d80847f92d2e310b537b8dbbd8a76840a29b13f00f9a65",
+      "state_sha256": [
+        "000a33b33f0beeee61ad6bc3f11f362fd5d9c6d8ecf7a7627575d9ebc775e121",
+        "ce18466b08cc9ed61a3a64e9f8a363617e8242fcb2975e9e0bac1a3845e41a83",
+        "bb16f12f5213b093258f3318b209132d9a69cedaf6eed9cd3a58e4b8f95c69ac",
+        "3570eb0eddc032fc72c306085780b4dd07e62197c67090758f067a6abaabe4f4",
+        "1556a84b40ca1c75f8661039f92b96f364566d43ebc12ff659472cb9ea9e3dfe",
+        "b821d201522431551839eb742d3243087a7b7d2ce32756e012b0c8fe79ff46ef",
+        "c7d2bc8cec81555fe229f64590fe7298bd306182c444967a8dd1c7dbee228009",
+        "49d835ef255cd895332c22c3894c6ec99c9ad64354166bfefd13176292fc95d3",
+        "da821c1dcd29ac4e8680c66238fa0cd6d75f3727a803e446e8c0a3926f373a1f",
+        "fde5461741fcba12c8969340670350c1a1228fc05395694ef2a5243ba09939aa",
+        "8b0d910f2312b10c81e5ce73367d6c873d6987ba7af17190bbdfe056207a6386",
+        "358993a6b8dc977fc288ec95f06973014419783950f92347617c167707dab273",
+        "1a7560b4b3971bb6905ad76bb695de1b3723a975448a262d513437a8ef030784",
+        "a67998427fd8208d85950e0c342c560cf3c7a6684e6beac89c6f089f59c9474c",
+        "da82fb31fa7acbda67042c0fa869f0bbb43aa372c5ab4c30fb8320d4c859e1e2",
+        "59768df4bdc665392bc99cef384d8c929d6db74658c01d1c9c70ffd345d4509a",
+        "d479aab08e5fdeee65ffde83951846b8f9285b6d09b8c6029aba0447d5a5805c",
+        "3f1646447145402342a6fdaab871ee8649c07ef8329a1ee4bb8ca5b752a64026",
+        "7e0f16756356306b247dba56491e1ce4a97f45130bce7f25f234f5d015fb1e00",
+        "a7c7260b67280c20b347cbb33bdecd712bc5eb0c0938bddf06f31c30ed7adb99",
+        "edf94b89a2ad2db0eee7c78c5d8eccede2d820d8776ddeb8df91d197e1c6a1e3",
+        "6b7f7144f4a3d0557a5920bfc4fed7ee07a41fc3a08115da61305a6b9b56f62b",
+        "6f3188a260d5ced7373fca69e23ab6523a4f217e8f18fbd4955454f1e40edba6",
+        "d58240005f5a610eaf5598fe3614ee6711a3b7d2999996c354e9f646fe96ef69",
+        "edbb47efddb5c8070e369209e44c3928710705e5b71d6895e422aa440fd7597b",
+        "87e12e4f17e0123e33b786a5a4158b21bcde3ed273d13e970ce38cf3f1c6e01d",
+        "be14a5b0caaf4b3db2626836137035e437fea3f2371126189dc560a808cddb9f",
+        "3832a8054fe665b268fa7bebb17b2c4e116d84801ad7833bc2a27b3c4b01ae55",
+        "5b27f4ec4e614b50130be381ffbda93a8b3fb0922d9c483d17f52973921ff114",
+        "1710f97cc382ba8bdfdcc2bafe73d0efe2421faac5f93152bf26cc020b18735e",
+        "f3f25f1ab2b43ca0828fb5c85338006de8b5609bfb394b976fb17370d784be8a",
+        "0976e1c137d864953280f18994bd98b7a6f6d46047e10fdf22a8412efc32a528"
+      ],
+      "max_steps": 280
+    },
+    {
+      "suite": "libero_goal",
+      "task_id": 0,
+      "name": "open_the_middle_drawer_of_the_cabinet",
+      "language": "open the middle drawer of the cabinet",
+      "bddl_sha256": "832ab48ec476807c767e8985666e295700f92d1f8daeae1c34eee1e75293769b",
+      "init_file_sha256": "977efe1216bee72bb4e9fa9ec4be1bcfe37fb00ece815eac117feba019b34b9f",
+      "state_sha256": [
+        "5a8f40221c0b59dfaa1061b36a49d4b10b0b47ffb82a1ac0b10080a2aa466ec4",
+        "7e37e0c67213d1237e09e0e5e381cd9bfd4b0bfc2013807549c0436c0e84e655",
+        "221658d3c5c68a7d9d4606eee6e2dedfc8a847525fd96da47b17615374007fe9",
+        "36ef92133a0b1fdc325122cea1e9804551985aedb8f2d1ca9860bc47e7b3cc6c",
+        "8d21166d2268969f06ab02bd0fe9fd4e70a2719bcd01e9b13e0d2c0f54c5dcb5",
+        "89a52c58afa55544eb487f423a9af7566030424ab7452b3b156682714452c3c7",
+        "0c5fb57980a8090c685fe9c961b3311a094861ed3be220676f4dc8b4d0a1ca7f",
+        "2ba640895f55f5760a3f8b3e39922acc8d9bfe1183fa68d60be28d0bd28c7d2a",
+        "790f43f3f1347f7dabc2b6d57c6bee776eab2f30436b9e4136f4ec58a0d00c2f",
+        "6abbd52e5528cfe1163c6d02a4384ace7468d1e679b5dfac6e4ea65c7e101e5e",
+        "358f09a6861cce71b38fe5c338f6325a1c86b3e6fc334644a6d4c1b2d7b3469b",
+        "aaa06e7806508f9c6fe2ffcee515ebcc896e411a0ada55f2b4a8c9d865a0bead",
+        "8e8a413d65696626b374c7d5d08d26e7517d462cecf98529ac5aa49edff0b0b9",
+        "e5b97fdef12134f93f883a9e933d7ad5d4b0033d6d2069a8cc715ca8b7c8aa0e",
+        "622de4a27f0152ef0ed826280e73df33d4a533da037057139cd85f5cf4d8226b",
+        "21ec791c09166a656c876a8064afb2bdd891e527ed1646d6e76e198a64cac636",
+        "b45fccfb38a5e82f7aea4b625beea2e49f07935ba7ab592b938d302943a50c54",
+        "bf0666561721667a896c8bd8eef55851c579c71a73c7c0a31ff11ceef0e5a882",
+        "2e479e6cf05d366effc830cf9314ebeaa170ea556696926dbcbdaaeae4d536fa",
+        "325574a4420cdd742b1031be71a7367a678cd076c39aeffc4dd8187e2a5c058e",
+        "8e5dc1a3ab2ea0844ae19c66472a5f2a4d48e9965b3166f7c380428310479469",
+        "3311d0238aa74cf924b650834b01722adb77bec14703c0630afb0ca6c2f6aaa2",
+        "691b53cb88c123c0fdeed583be88c2371bb7aa077b2605113ce0538c96bd95d4",
+        "925b60edb7c35a090316576c6dca0d46fc386cd3879af25da45437660588b8d4",
+        "3bb4aa58c04fb9b1f6f5ae13ce05548f71b7b34e185c827b54e0aa4b5e8a06f3",
+        "db1ecb3c1e13d8da29f7fb0309bec30050deae7245652f4b6a22643ca11a0895",
+        "b8f2f742a22938bf66f244c34b64f07168d33ba9b3c91322e3dbfa310fef013d",
+        "8113baea563328e37e51e31d01930886e76c1c6324a38ea06ccfdb1b5f1f6764",
+        "b16de3610baf8f18ed27ae34b90609885b213dda0366d7c8781b232a81060b56",
+        "d6b736a38b3f98abbc9b3684409798051d5036903f3c05f0c2ab7f01a71ad0fa",
+        "e42a034bff1fcc979e27e1bd129d5d3a7f7b69fea03a4ee4e9a7131a18c9e95f",
+        "64c5b3252c946b3b0663e42081106df0114f6666a493ae8cbd409979c34902c0"
+      ],
+      "max_steps": 300
+    },
+    {
+      "suite": "libero_goal",
+      "task_id": 5,
+      "name": "push_the_plate_to_the_front_of_the_stove",
+      "language": "push the plate to the front of the stove",
+      "bddl_sha256": "26f22f8ad39a4b2b344b049115c45661a877fa0b4821fb78246725e7e87d8c0b",
+      "init_file_sha256": "794beed679b18bbd7d9fb851c81877a974915ad63addff2d5ac5af0607fafac9",
+      "state_sha256": [
+        "cea30572c1ece1c5d5a53c64fef51544c3a02dbb6bf6bc06d02d3a03ea719aa7",
+        "5ce7bdf94e5030da4f2cdaecaf680d5607faec8614ca63773f1b67ef045d78bf",
+        "4c06373a64e22c7180a440eece4fa0d7ca88f8e4bf1b8614c618f9a98abc6cf9",
+        "3a96707ff7ce9e08324be529565c2ce5545c17092d83c16e16ffd0223a25ec8c",
+        "71116ae4b43c3c11ec4fb932fdfabd0a923cb3669b4f8508a96fa58284f2afa6",
+        "da25099459a0b3a9454250414edc93a4a035deeac9d96662135923e219be44b5",
+        "6dacc12f81dfc8ae543e0cfbb1324678807b34c10b134a6b94359f5ce347a46d",
+        "3b5fa76fb7c05b124b77ff448d9a11bfddbc0a3fbc0d42c7b5bcd33408b1ecbf",
+        "347008fe0d8842980dc4f4899a85c1baa62a26a280891c9668fd397ee6bb47aa",
+        "62d91d2939e24f1c6d9d4490e9d83e10870438de4f550d42f4899a74003b6ac4",
+        "4ba9cae141e8f225b486fd83b9646384462158a7f333bc113efe882150aed013",
+        "701e9b1d0e22e38d16f3b8157233cbeb6f3519e970bfaa2381b94ec3e2dd98bd",
+        "efba258d3e714ccdf655fb6b4882857234a1b26c40a37b3e3b56b0af2c7940b7",
+        "cd83681cf1c22c6c488975bd71fe2dfe05b53646cfd5d27890e1352e75eb0d26",
+        "0b5df160ac7ae844d76f0cff137f7f1c0bdc6fac3d8273ac7e8a60a2b4a7b6dc",
+        "10f19d5b1f24db17bb7b0f29092baa8a628731acbf070726162c6c8d6796da41",
+        "e9634867323fc832ca2bfd387f8a91bdda0bd2373b210a89efd8e00bce546476",
+        "f4be93c4b21667ec0a8addf1d983fb59f1cedb3e1b9925d712604e5a226e1c24",
+        "6a4808ac7cb06158895e7044b50d4d29ab6178ea6e15bb7d44823225b5d91b90",
+        "3db87474b5d8dfe7cd87a2dfd80bb54329bd2bbb18c449bf43532f4f747bad66",
+        "84c2cc08df529ca20c8894698d30e5a1395b2f3236d559d0d499423408f7afd8",
+        "30d0f0cf4eb23819b1abee939adb6cbe442b0a5582d3e1b9b8f15c443ae7e582",
+        "096539e5493610da8217256ee9fd075986ad1a199919dcf3577046420669e9e0",
+        "59d84cc34ccf5008e9d71994a04b7c419f1d3e5beb4ed82d2303c9a94b8d6bd7",
+        "89af943e81a395724ca24adce43df02c365969d8b4426d722a482b91b8e30495",
+        "69ed9678d13b9125d678e2198685bf28157f1117416ca73489d7e02a66a5143c",
+        "67c40513180456f91bb739ca428c535913023b315bc23e57f8034f8e6c59ac50",
+        "314b398da670be3476b67256f43626bb4b4225317d434ee17589526b24431285",
+        "bc8cc7b426f2fe87d831aad3062f232ec7f0e63e56fbb6ad6ffca001ba657da5",
+        "75fd3dfabd694bb79077b248e1ee74be784d2cf52e1490b0c01627940e45e5de",
+        "9f5e13bec72d8bf3cd7ed242e600a5a875b64d228c0b3873924da10410edbf86",
+        "adff9355e78c17de1382913209d2b0d30bb050ac8fbe25ba337fc5ca801583e8"
+      ],
+      "max_steps": 300
+    },
+    {
+      "suite": "libero_10",
+      "task_id": 0,
+      "name": "LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket",
+      "language": "put both the alphabet soup and the tomato sauce in the basket",
+      "bddl_sha256": "2e661058917f683a25bce480015197f0a2c1911bcbc2b9dd9d947199069c9618",
+      "init_file_sha256": "1899fe54c51e24a41d5f9e32254730d6777f4894ab68e0e873f1fa7ae2062030",
+      "state_sha256": [
+        "747b653b2ca1feeae8f3bd994880ce743730993ea5ce4bd003623e877f26b3bd",
+        "cf85ed132ae09bfad8798a3126b14879071228e0e2e7bd17c3e9d20e519cdb5a",
+        "be0c23f82748baf99eea1ecc4ff28eb82163945bc0bfffb509eeef0decced138",
+        "6929d3090ef9a3431c21b84539c99c3b481b09042bc6f3cf07ea0cc44fb65a70",
+        "376f48b75f50d4e1eff9e3f49f307de0bcfc44d2a081f5cb9c124cf985330c41",
+        "75c57eac81a43b69380c91c42dbeab8fdf193145c3ca3d105f2ce95bb0d29a79",
+        "dcb524a280152c4b53390f6427c7bc70e6ead7595eeba6bf76e80c31a43fcf11",
+        "83d046a490f079a3b89c6fb4f09bdc88433d3b83ea965fa01f93fcffb93c8041",
+        "145a55c84823ff115a6f31ca6bbe681c99cc1dc6dd3bcced415465edd8e6ce90",
+        "3d09fb7b6965328e11bd7abfdb58333428e00484c192bf88338d0f3d69ac5406",
+        "f3f14a7829a2265990d40f5a6212c297fb802727b98a8e1a66fcb16c757f5143",
+        "8498d72842ad1b202a7909f4bf280eb10043dd4f5586fe0c34b93dc6c599ce87",
+        "55d40072429fe5faa1a13b6c94d2a0c044a5c280b0374c43ee9fd0db799364c7",
+        "a5772da869875502626dac37ef4f7ecf06ed2ebd12624447bfe8436d42f2ce49",
+        "3e0acc5cb5b991a14bf29326f068b47fa444be1e51e65debcf25f80db7aaa3d6",
+        "a6cd41d3a9cf563d539bb4bc3d01b60ba964162635ec6c99b5fd23bdc981d95f",
+        "5d4fe04c48519affced9c5486a50710cc496f6f4df1f7c4ba0e4db594fba8601",
+        "9db3fd136836ad8fb6293e03825c32b527869a18e69791190fc5efc7268dfc7e",
+        "bbbc83e66162ac23c060a6cdafc5bbd90ed62856ff9de8da4b70607d091e1e34",
+        "a6fb28270e5509da8619115495b070fe25bec4e644f15080bf7a3a61f8382a16",
+        "31cf655f31ddf3a02ee0f767cf1240387c2749ebcfdbbf29b22989bd606ffd96",
+        "745c4dc1054445e2618f028670b26b5435dd4394046b7a856285920a2f7b7610",
+        "84f995c0b55083edc3737d57fad688490204ae3844ec8795cd73f6cc413fe3aa",
+        "b7905a2a29009d4296fa262ec5a1cb1d01351e50eccee52bc232cf1583dd93a8",
+        "09933f7bd35ba33a8dde77d046768df4247a8897411da15add15a8d9c2dcfcc6",
+        "0b82cd37e5548f177701291f9479c5d963a1488cbc29283b7b6d6d4ece5fab23",
+        "f3eb487360e32e1b74ba86f2c7dd711890eed94ac141ec434d8bf6ac61208d54",
+        "052ceb133943bb3c17a6949a83c15b7afba97698bf8d8754cf64b63181d927e2",
+        "d079c26b3e1034e2fe2273301c6da1c5b0f7f6eb409780591f0ef1729c3d576e",
+        "ab5eb887a7dedf624c6b97ffd5a7f8782256acd4671804fe3782900f1cced214",
+        "ba205c0f9f1680957015fb37ee00500c3cd03a30540bb83ec8b856efcf5b925e",
+        "ddf7ab5d007fad164a51292976ff50ab6f95448d50446e1a3db30618fb1a48f0"
+      ],
+      "max_steps": 520
+    },
+    {
+      "suite": "libero_10",
+      "task_id": 5,
+      "name": "STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy",
+      "language": "pick up the book and place it in the back compartment of the caddy",
+      "bddl_sha256": "07ca32c940d70c065e870452ef9c63e6dfa1d8506e6a86cf9b3763f652ba2d9f",
+      "init_file_sha256": "6cd3937ba18d64e72223222af36888d26ea201840415adbc4dae590454d0a5a8",
+      "state_sha256": [
+        "407c3d5eb11fd5b33bd2a6dea73a37415a99d7e72f0cc291074de29b1c63c37c",
+        "fbf82707bd0a7721f0e118ac32aad30182e487e7a940bec7128ad6f18457e139",
+        "83ff554be370e25fb3b049d5c3db3f2cf4f20524a0eab8beeda093c6a81bad66",
+        "72e9938805b4da92baeb254ab7611081832edbb30e3f07c8136e1ea8a00fa235",
+        "825a43323d564777617871b44f4c0f871a263f5aac13b1d04f204cc4957134e8",
+        "8e5a64567e7494c932e2b3e66d902342bdacc3b3d4216f9e1c36cf5be49a0acb",
+        "714bd3564af9500471de00d628f8b6191e6bcd2954d8e3ee9eb6abd2bf67f543",
+        "2f359eaf0499d91a9e34f60059daf9c65b871bdc754a2860f66f07dfd1597fa8",
+        "75a83a20065300d19f7fbb49c3ab5236e56ededda0c2517e27b77c0e1356e23d",
+        "2d485bf26d885754bc4f03ffbe09567c61e6df490cff21a8c6d76ad549be444d",
+        "ec85606b107d6c4ec253bea2b62b13171069c1546d6d27214dbf37f05965477b",
+        "9401b9f3228c86e527dabafc4a1c25dcd40b4b80d14ba6c3c2ea9ee3cbba6976",
+        "ea8e8a4c936d846d3f81bd606b8805e2502f7f892caa3f8088457a463bd4e4f9",
+        "167b213a6a6cfd130bef808353233e9ea395beca833ba9b8f0654344414c2a1f",
+        "9cf453b16ec5820c8d73cc7995ad6ac52db3d13ebfcdd3a9ab0bb7380869aa66",
+        "18789855054f53dc0771f9a9bc1a69aee708e48eb4c59626dd484595587f5f04",
+        "7a48f484188b5fa8d1d3ab8a730daa6348851bf761278da2fd051cd4a2308285",
+        "d121f7c9801ed2290b394f2b8402608cf52218712e7ef9da27bcfc210607b52a",
+        "375083ca6c9ac0148a8821ed2b9cf5aedd191661dc54707967e67f777bc0e3ba",
+        "92c976d02e613510fb751c05f197861f4ce9d405d06624760ec79630ba768a96",
+        "b24f3f70bf76139e2ac2b1cbd7c9a49f90e99230c7b3bd88a203185505e171f3",
+        "9013f031f4c1a778fbb40b0634efc46638cc304496be66010feda196903a1bbe",
+        "3aa2c56f7ec59b999707f06a1c0e30518811d3f80b9acaac146240620abfdbf8",
+        "5840a65893922afe280fbbd0d513f4e0251579b5f591c08371cf0da0ce5e19df",
+        "e9d6fb17ee432ce1334028c23513153219a1a52a828a132b61921afcf8ad4f9d",
+        "5fe3009d5bef1c8df5e8bbc8aea9a78a16efc447b44b3f34fe73c97b4ab15af6",
+        "d5719527459ad4a215f044b8dd0281724ad2fcc43610818a1edf0fcb0a64b27a",
+        "fdafae2bfd85c6bfa048c5c8bb64a84a2a4f57ac1643256a85a672398f2d41ca",
+        "04eaeaba22c6519f38e035529d256a8c78ed170e0aeb1a0cb57a1c3b8528158d",
+        "719d0ad7a583ec76f888f110ca41b4c2afed1d535847c31fdc6eb14a5666f01c",
+        "ee10d21c16cd08b5e1c122cd8f2020d809984a257431676bb4e2470d4948514d",
+        "b6384d77b9272e4ddf41b1436de820472183ecf4db6e568d5aed39cc8a22efe7"
+      ],
+      "max_steps": 520
+    }
+  ],
+  "model_id": "official_T2",
+  "checkpoint_files": {
+    ".gitattributes": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+    "README.md": "8f0505f851e9bec50a1ba37e5776f69bf12f7c8f5307f796deff026fb3761963",
+    "config.json": "e346a63094732ea28e05b08302a218306cf6541960b663a3cb4b6948e4efe6e0",
+    "model.safetensors": "71d9563c8295284acba8fc2d5c19de000d6fe9ba58a406832af7ef3d221ed52f",
+    "policy_postprocessor.json": "ad2d22405cb63be4932c4a4d9a69bc9953df02a01235c5f420b679dbe6bfe7c5",
+    "policy_postprocessor_step_1_unnormalizer_processor.safetensors": "7008ba73c73887e5a7e631d478de9563ec5a0c51b7f0327f2530d7326c4b039e",
+    "policy_preprocessor.json": "29267ff4423fcce93bbd76ad0f386905f9de5d267ca13379a5795a514a81b7a9",
+    "policy_preprocessor_step_5_normalizer_processor.safetensors": "7008ba73c73887e5a7e631d478de9563ec5a0c51b7f0327f2530d7326c4b039e"
+  },
+  "original_manifest_sha256": "e1c4faa080655b94779237b0128a2106ebdae15cf2a04469229da777ea9a3301",
+  "entry_sources": {
+    "/root/autodl-tmp/smolvla-flow/scripts/evaluate_t2_rtc.py": "aba0e9e507486cf4900d369c85695d5a8c3dea95b0cc9a763a62c122cae8c1ad",
+    "/root/autodl-tmp/smolvla-flow/scripts/t2_rtc_policy.py": "86570d50e26dabe86d6aa9481273a754ac777b14cfd66d1525d791645e829d3e"
+  },
+  "inherited_sources": {
+    "/root/autodl-tmp/smolvla-flow/scripts/evaluate_s1_rtc.py": "9ea6299ebb8101bd9b3d678d05ff1a385209b62510f60ee33a31c956ef6f9e96",
+    "/root/autodl-tmp/smolvla-flow/scripts/s1_rtc_policy.py": "b1e0a19648867b1c8cba5d91ecfecec014222e60805406794f79feb78fbadef9",
+    "/root/autodl-tmp/smolvla-flow/scripts/s1_resources.py": "a85828a8097c6ea924ebfc57847cdebc2c23d9ef7b7e27a5aaa0dbf27588d4e7",
+    "/root/autodl-tmp/smolvla-flow/src/smolvla_flow/rtc_benchmark.py": "40bcc94b9178153a64591182caf3c27ad495036ecdaa02fe22935c8099718dce",
+    "/root/autodl-tmp/lerobot-1bb99332/src/lerobot/policies/rtc/modeling_rtc.py": "c2610d1de1e3846f8ab1b8806cddc6b58a6784ce5cd85892c873acaf73512f92",
+    "/root/autodl-tmp/smolvla-flow/scripts/run_libero_rollout.py": "da5aeb4d16bd46a4d193e6d94db43573b3ea79b56f9221084703d59fdbaca59b",
+    "/root/autodl-tmp/smolvla-flow/scripts/train_distill40_stage.py": "9a89d25ca2109ddc43c5e49e7275f2d91c4d59e7fe93d4a99b3031117e4be511",
+    "/root/autodl-tmp/smolvla-flow/scripts/evaluate_s1_interleaved.py": "bf921bb19ff9401358d68f1634ccbe91b6a9ae1cfc9d4a086a0b75784f655104",
+    "/root/autodl-tmp/smolvla-flow/scripts/report_s1_rtc.py": "b07ffab3cff06b295ebad5d60459f3bd5e8c1c52b4d1a1c76d7a1921967f5d53",
+    "/root/autodl-tmp/smolvla-flow/scripts/s1_rtc_process.py": "9e935e9a5251c75977d92583b84d45f38a7b27e74ba167ce26f7b0219edcd7f5"
+  },
+  "execution_runtime": {
+    "version": "split-process-v1",
+    "controller_torch_threads": 1,
+    "policy_torch_threads": 4,
+    "batch": 1
+  },
+  "saved_prior_usage": [],
+  "jobs": [
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task05/init30/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task05/init30/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task05/init30/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task05/init30/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task00/init31/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task00/init31/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task00/init31/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task00/init31/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task05/init28/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task05/init28/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task05/init28/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task05/init28/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task05/init31/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task05/init31/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task05/init31/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task05/init31/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task05/init28/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task05/init28/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task05/init28/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task05/init28/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task05/init31/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task05/init31/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task05/init31/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task05/init31/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task05/init30/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task05/init30/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task05/init30/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task05/init30/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task05/init27/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task05/init27/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task05/init27/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task05/init27/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task00/init30/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task00/init30/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task00/init30/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task00/init30/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task00/init31/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task00/init31/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task00/init31/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task00/init31/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task05/init30/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task05/init30/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task05/init30/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task05/init30/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task00/init28/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task00/init28/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task00/init28/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task00/init28/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task00/init28/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task00/init28/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task00/init28/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task00/init28/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task00/init27/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task00/init27/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task00/init27/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task00/init27/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task05/init31/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task05/init31/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task05/init31/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task05/init31/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task00/init29/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task00/init29/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task00/init29/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task00/init29/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task00/init29/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task00/init29/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task00/init29/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task00/init29/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task00/init30/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task00/init30/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task00/init30/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task00/init30/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task00/init30/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task00/init30/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task00/init30/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task00/init30/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task00/init27/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task00/init27/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task00/init27/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task00/init27/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task05/init31/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task05/init31/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task05/init31/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task05/init31/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task05/init29/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task05/init29/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task05/init29/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task05/init29/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task00/init29/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task00/init29/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task00/init29/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task00/init29/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task05/init27/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task05/init27/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task05/init27/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task05/init27/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task05/init27/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task05/init27/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task05/init27/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task05/init27/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task00/init27/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task00/init27/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task00/init27/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task00/init27/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task00/init31/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task00/init31/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task00/init31/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task00/init31/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task05/init29/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task05/init29/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task05/init29/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task05/init29/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task00/init28/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task00/init28/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task00/init28/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task00/init28/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task05/init29/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task05/init29/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task05/init29/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task05/init29/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task00/init27/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task00/init27/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task00/init27/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task00/init27/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task00/init28/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task00/init28/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task00/init28/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task00/init28/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task00/init31/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task00/init31/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task00/init31/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 31,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task00/init31/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task00/init29/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task00/init29/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task00/init29/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task00/init29/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task05/init28/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task05/init28/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task05/init28/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task05/init28/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task05/init30/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task05/init30/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_10/task05/init30/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_10",
+      "task_id": 5,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_10/task05/init30/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task05/init28/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_goal/task05/init28/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task05/init28/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "init_index": 28,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_goal/task05/init28/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task05/init27/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task05/init27/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task05/init27/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "init_index": 27,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task05/init27/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task05/init29/async_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_object/task05/init29/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task05/init29/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_object",
+      "task_id": 5,
+      "init_index": 29,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_object/task05/init29/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task00/init30/rtc_d100"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task00/init30/async_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "formal/libero_spatial/task00/init30/rtc_d0"
+    },
+    {
+      "phase": "formal",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 30,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "formal/libero_spatial/task00/init30/async_d100"
+    }
+  ],
+  "checks": [
+    {
+      "phase": "check",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "check/libero_goal/task00/init13/async_d0"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "check/libero_goal/task00/init13/rtc_d0"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "check/libero_goal/task00/init13/async_d100"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "check/libero_goal/task00/init13/rtc_d100"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "check/libero_10/task00/init13/rtc_d0"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "check/libero_10/task00/init13/async_d100"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "check/libero_10/task00/init13/rtc_d100"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_10",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "check/libero_10/task00/init13/async_d0"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "check/libero_object/task00/init13/async_d100"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "check/libero_object/task00/init13/rtc_d100"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "check/libero_object/task00/init13/async_d0"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_object",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "check/libero_object/task00/init13/rtc_d0"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "rtc",
+      "delay_ms": 100,
+      "key": "check/libero_spatial/task00/init13/rtc_d100"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "async",
+      "delay_ms": 0,
+      "key": "check/libero_spatial/task00/init13/async_d0"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "rtc",
+      "delay_ms": 0,
+      "key": "check/libero_spatial/task00/init13/rtc_d0"
+    },
+    {
+      "phase": "check",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "init_index": 13,
+      "mode": "async",
+      "delay_ms": 100,
+      "key": "check/libero_spatial/task00/init13/async_d100"
+    }
+  ]
+}

@@ -14,6 +14,7 @@ policy, ACT, or Diffusion Policy.
 from __future__ import annotations
 
 import math
+import inspect
 import queue as thread_queue
 import random
 import threading
@@ -393,12 +394,36 @@ class PreprocessedPolicyAdapter:
         # control thread's observation object private from the worker thread.
         worker_observation = dict(observation) if isinstance(observation, dict) else observation
         batch = self.preprocessor(worker_observation)
-        return self.policy.predict_action_chunk(
-            batch,
-            prev_chunk_left_over=prev_chunk_left_over,
-            inference_delay=inference_delay,
-            execution_horizon=execution_horizon,
+        predict_action_chunk = self.policy.predict_action_chunk
+        # SmolVLA accepts RTC-specific keyword arguments.  ACT and Diffusion
+        # Policy checkpoints in LeRobot expose the same chunk method but older
+        # releases do not accept those keywords.  Inspect the bound method so
+        # those policies can share the queue without swallowing unrelated
+        # TypeErrors raised inside their forward pass.
+        try:
+            signature = inspect.signature(predict_action_chunk)
+        except (TypeError, ValueError):
+            # Some compiled or extension-backed methods do not expose a
+            # signature.  Preserve the RTC call for them and let their own
+            # error surface to the policy server.
+            return predict_action_chunk(
+                batch,
+                prev_chunk_left_over=prev_chunk_left_over,
+                inference_delay=inference_delay,
+                execution_horizon=execution_horizon,
+            )
+        accepts_kwargs = any(
+            parameter.kind is inspect.Parameter.VAR_KEYWORD
+            for parameter in signature.parameters.values()
         )
+        if accepts_kwargs:
+            return predict_action_chunk(
+                batch,
+                prev_chunk_left_over=prev_chunk_left_over,
+                inference_delay=inference_delay,
+                execution_horizon=execution_horizon,
+            )
+        return predict_action_chunk(batch)
 
 
 class LeRobotPostprocessorAdapter:

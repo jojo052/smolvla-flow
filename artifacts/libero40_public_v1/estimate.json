@@ -1,0 +1,5 @@
+{
+  "method": "pilot total_seconds per suite x remaining episodes x 1.3",
+  "estimated_full_400_seconds": 48472.35103607178,
+  "note": "task0-only estimate; other tasks and first-load overhead may differ"
+}

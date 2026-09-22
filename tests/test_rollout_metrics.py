@@ -87,6 +87,7 @@ def test_sync_episode_applies_and_records_gripper_hysteresis() -> None:
         max_steps=3,
         gripper_polarity="positive_open",
         torch_seed=None,
+        sim_control_frequency_hz=17.5,
     )
 
     assert policy.reset_count == 1
@@ -98,6 +99,8 @@ def test_sync_episode_applies_and_records_gripper_hysteresis() -> None:
         "polarity": "positive_open",
     }
     assert result["gripper_switch_count"] == 1
+    assert result["sim_control_frequency_hz"] == 17.5
+    assert result["wall_throughput_hz"] == result["effective_control_hz"]
 
 
 def test_control_sleep_records_measured_duration() -> None:

@@ -472,3 +472,81 @@ RTC 异步组的 waiting tick 为 0，deadline miss 为 0/25。微基准给出�
 RTC 将真实队列切换边界的平均跳变从 0.635285 降到 0.285086，改善约 55.1%。全局逐步动作平滑度略差，说明边界融合的收益集中在新旧 chunk 切换处，尚未降低整条轨迹每一步的平均变化。
 
 异步控制循环中，单次 LIBERO `env.step` 约为 86 到 115 ms，控制周期剩余 sleep 为 0。15 Hz 要求每次控制步在约 66.7 ms 内完成，当前同进程仿真环境已经超过该预算。后续频率优化需要单独处理仿真步进开销，或把环境执行与策略服务拆到不同进程后重新测量。
+
+## 2026-08-11：ACT 和 Diffusion Policy 100 step smoke
+
+### 目的
+
+在等待完整 task34 动作 parquet 的期间，先用相同的 8D state、7D action 约束检查两条基线的训练、验证和推理接口。ACT 使用 50 步 action chunk，`n_action_steps=10`；Diffusion Policy 使用 64 步 horizon，训练噪声步数为 100，并测量 100、20、10、5 步逆扩散。
+
+### 数据和实现范围
+
+- 数据源：确定性合成 state-conditioned action chunk，训练 256 个样本，验证 64 个样本。
+- ACT：紧凑 Transformer decoder，输出形状 `[batch, 50, 7]`。
+- Diffusion Policy：共享时间、state 条件的 temporal denoiser，输出形状 `[batch, 64, 7]`。
+- 每个基线执行 100 次 optimizer update，记录初始、最终和最优 loss。
+- 产物明确写入 `data_source=synthetic_smoke` 和 `libero_episode_status=pending`。
+
+### 结果
+
+| 基线 | 初始 loss | 最终 loss | 验证误差 | 推理计时 |
+| --- | ---: | ---: | ---: | --- |
+| ACT | 1.069037 | 0.033453 | action MSE 0.030314 | 0.611 ms median，CPU |
+| Diffusion Policy | 0.960158 | 0.287782 | noise MSE 0.161719 | 100/20/10/5 步分别为 11.078/2.222/1.122/0.563 ms median，CPU |
+
+两条链路的 loss、验证输出和采样输出均为 finite。该结果只说明紧凑模型和训练循环能够运行，不能作为 ACT、Diffusion Policy 的 LIBERO 成功率，也不能替代 LeRobot 官方视觉策略。
+
+### 后续动作
+
+1. 在可读取的 task34 parquet 上构建真实 state/action chunk，保持 31/7/7 episode manifest。
+2. 将基线输入换成 LeRobot 的两路图像、8D state 和相同语言任务处理流程。
+3. 每个基线先完成 100 step 真实数据 smoke，再做一个 LIBERO episode，最后与原生 SmolVLA、蒸馏 SmolVLA 使用相同 seed 矩阵。
+
+### 当前阻断
+
+4090 工作区的 LIBERO 资产目录可用，原始动作 shard 仍未就绪，现有 parquet 仅覆盖 metadata。该主机当前无法连接 Hugging Face，因此 ACT 和 Diffusion Policy 还没有真实 task34 训练结果或 LIBERO 成功率。补齐动作 shard 后，继续使用本节的 31/7/7 划分和同一 `run_baseline_smoke.py` 入口，替换合成数据加载部分。
+
+为减少下一轮接线工作，新增 `scripts/build_baseline_data.py`。它会按 task index 过滤 parquet，按 manifest 选择 train、validation、test episode，导出 `[N, 8]` state 和 `[N, 64, 7]` action windows。`run_baseline_smoke.py --data-file` 已支持读取该产物。图像和官方 LeRobot processor 仍保留在真实基线接入阶段。
+## 2026-08-16：统一正式评测协议与官方视觉基线接线
+
+本轮把正式对照实验的共享口径写入 `configs/evaluation_protocol.toml`：LIBERO-Spatial task 0、数据集 task index 34、两路相机 `agentview_image` 和 `robot0_eye_in_hand_image`、256×256 观测、280 步 episode 上限、共同执行前缀 10 步、20 Hz 控制、checkpoint preprocessor/postprocessor 归一化和 30 个环境 seed（0 到 29）。成功率同时保存成功数、总回合数和 Wilson 95% 区间。
+
+`run_libero_rollout.py` 新增 `--policy-type smolvla|act|diffusion`。ACT 和 Diffusion Policy 从官方 LeRobot checkpoint 加载各自 config、视觉输入和 pre/postprocessor，使用与 SmolVLA 相同的 LIBERO 环境、动作后处理、夹爪迟滞和 ActionQueue。ACT/DP 的 `predict_action_chunk` 不接受 RTC 专用关键字时，异步适配器会保留普通 chunk 调用并继续使用队列重叠融合。RTC prefix guidance 仍只对 SmolVLA 生效，结果中记录 `rtc_supported` 和 `rtc_enabled`。
+
+新增 `scripts/train_lerobot_baselines.sh` 和 `scripts/run_baseline_rollout_matrix.sh`。前者固定 ACT `[50, 7]`、执行 10 步和 Diffusion Policy `[64, 7]`、执行 10 步的官方训练配置，后者默认运行 30 回合同步和普通重叠异步对照。新增 `scripts/compare_policy_rollouts.py`，负责检查 protocol/seed 一致性并汇总成功率、Wilson 区间、policy-only 延迟、有效控制频率、waiting tick、deadline miss 和离线动作误差。
+
+新增 `scripts/print_task34_dataset_split_command.py`，从已有 31/7/7 manifest 生成 `lerobot-edit-dataset` 的 episode split 命令。正式视觉基线训练前必须先生成 task34-only 数据集，防止官方多任务数据中的其他 task 混入训练。
+
+新增 `scripts/evaluate_lerobot_checkpoint.py`，在 task34 validation 数据集上读取两路图像、state 和连续动作窗口，调用官方 checkpoint 的 preprocessor、`predict_action_chunk` 和 postprocessor，统一统计共同前 10 步的 action MSE/MAE、预处理耗时、policy-only 延迟和离线端到端耗时。该脚本不会把 validation 动作误差和 LIBERO rollout 成功率混为一个指标。
+
+当前限制：本轮只完成接口和协议接线，没有在本地生成真实视觉 checkpoint。4090 主机需要先准备 task34-only LeRobotDataset 和官方资产，再运行训练及 30 回合矩阵。已有 compact baseline 仍只有 state 输入，不能作为最终视觉基线。
+
+## 2026-08-31：AutoDL task34 官方视觉基线训练
+
+### 远端环境和输入检查
+
+- GPU：`NVIDIA vGPU-48GB`，驱动 `580.76.05`，CUDA 运行时可用；`nvidia-smi` 实际报告总显存 `24564 MiB`。
+- Python 环境：`/root/autodl-tmp/venvs/smolvla-flow`，复用 PyTorch `2.7.0+cu128`，CUDA 检查通过。
+- LeRobot：源码固定在 commit `1bb9933215dcb7ffeeae6d3746cda3f73f5a59e2`，包版本 `0.6.1`。
+- 项目：以 editable 模式安装到同一虚拟环境。
+- task34 训练集：31 个 episode、3096 帧、10 Hz；样本包含两路 `[3, 256, 256]` 图像、8D state 和 7D action。
+- 抽样检查：图像、state、action 和索引张量全部 finite。
+- LIBERO 资产：`scenes`、`articulated_objects`、`stable_scanned_objects` 和 `turbosquid_objects` 均存在。
+
+### 训练前 smoke test
+
+- ACT checkpoint `020000` 的模型、优化器、随机状态和训练步数文件完整。
+- ACT 权重可严格加载，参数量 `51,574,663`，`chunk_size=50`，`n_action_steps=10`。
+- ACT resume 单步检查成功：训练数据顺序恢复到 epoch 51、sample 2104，完成 step 20000 到 20001 的更新。
+- Diffusion Policy 使用真实 task34 视觉数据完成 batch 2 和 batch 8 的一步训练，前向、反向和 optimizer update 均成功。
+- Diffusion Policy 参数量 `277,938,119`，配置为 `horizon=64`、`n_action_steps=10`、`n_obs_steps=2`、`num_train_timesteps=100`。
+- batch 8 smoke 的首步耗时约 `7.52 s`，包含首次训练步的启动开销；正式训练的稳态吞吐需要从后续日志重新估计。
+
+### 正式后台任务
+
+后台会话为 `screen` 的 `task34-baselines`，日志目录为 `/root/autodl-tmp/logs`。任务串行运行：
+
+1. ACT 从 step 20000 续训到 step 50000，batch 8、8 个 dataloader worker、AMP、学习率 `1e-5`。
+2. ACT 正常结束后启动 Diffusion Policy 100000 步训练，batch 8、8 个 dataloader worker、AMP，每 20000 步保存 checkpoint。
+
+ACT 首个 200-update 日志点为：loss `0.154`、L1 loss `0.152`、gradient norm `8.685`、学习率 `1e-5`、训练记录显存约 `1.21 GB`。各项为 finite，后台会话仍存活。当前条目只记录训练启动和早期健康检查，checkpoint 完成、validation 动作误差和 LIBERO rollout 需要在任务结束后追加。

@@ -20,10 +20,8 @@ def test_locked_experiment_config_is_valid() -> None:
     assert config["dataset"]["dataset_task_index"] == 34
     assert config["teacher"]["checkpoint"] == "HuggingFaceVLA/smolvla_libero"
     assert config["distillation"]["progressive_flow_steps"] == [5, 2]
-    assert unresolved_preflight_items(config) == [
-        "gripper_polarity",
-        "formal_evaluation_budget",
-    ]
+    assert config["evaluation"]["formal"]["minimum_episodes_per_variant"] == 30
+    assert unresolved_preflight_items(config) == ["gripper_polarity"]
 
 
 def test_rejects_control_frequency_drift() -> None:

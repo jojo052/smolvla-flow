@@ -1,0 +1,21 @@
+{
+  "version": "libero40-public-native-v1",
+  "suites": {"libero_spatial": 220, "libero_object": 280, "libero_goal": 300, "libero_10": 520},
+  "initial_state_indices": [0,1,2,3,4,5,6,7,8,9],
+  "pilot_task_id": 0,
+  "pilot_initial_state_index": 10,
+  "settle_steps": 10,
+  "policy_seed": 123,
+  "environment_seed": 123,
+  "flow_steps": 10,
+  "smolvla_execute_steps": 1,
+  "mode": "sync",
+  "rtc": false,
+  "observation_size": 256,
+  "action_processing": "checkpoint_unnormalization_only_no_extra_hysteresis",
+  "reset_time": "excluded_from_rollout_included_in_success_per_hour",
+  "model_source": "HuggingFaceVLA/smolvla_libero",
+  "model_revision": "6721902bc4d61e50a3bfdb11dfb4cb626f05d102",
+  "model_sha256": "71d9563c8295284acba8fc2d5c19de000d6fe9ba58a406832af7ef3d221ed52f",
+  "act_status": "not_admitted_pending_public_checkpoint_verification"
+}

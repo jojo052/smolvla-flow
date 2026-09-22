@@ -1,0 +1,37 @@
+{
+  "version": "libero40-act-native-v1",
+  "suites": {
+    "libero_spatial": 220,
+    "libero_object": 280,
+    "libero_goal": 300,
+    "libero_10": 520
+  },
+  "initial_state_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "pilot_task_id": 0,
+  "pilot_initial_state_index": 10,
+  "settle_steps": 10,
+  "policy_seed": 123,
+  "environment_seed": 123,
+  "mode": "sync",
+  "rtc": false,
+  "observation_size": 256,
+  "action_processing": "checkpoint_unnormalization_only_no_extra_hysteresis",
+  "reset_time": "excluded_from_rollout_included_in_success_per_hour",
+  "model_source": "jamongsteak/act_libero",
+  "model_revision": "8744e679f4038386070ff70723edab9bb6228bd3",
+  "model_sha256": "ae1d034c4d30879773a1f67590194a7ce5246c8466eb46db299696bfab2bb247",
+  "act_status": "cpu_audited_gpu_pilot_required",
+  "act_execute_steps": 100,
+  "language_conditioned": false
+}

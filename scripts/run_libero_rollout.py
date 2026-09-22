@@ -16,8 +16,9 @@ import json
 import os
 import statistics
 import time
+import tomllib
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 import numpy as np
 import torch
@@ -32,6 +33,7 @@ from smolvla_flow.async_runtime import (
     PreprocessedPolicyAdapter,
     seed_policy_rng,
 )
+from smolvla_flow.evaluation_protocol import EvaluationProtocol, binary_success_summary
 
 
 TASK0_LANGUAGE = "pick up the black bowl between the plate and the ramekin and place it on the plate"
@@ -39,12 +41,24 @@ TASK0_LANGUAGE = "pick up the black bowl between the plate and the ramekin and p
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--policy-type",
+        choices=("smolvla", "act", "diffusion"),
+        default="smolvla",
+        help="LeRobot policy family; ACT and Diffusion use their checkpoint pre/postprocessors",
+    )
     parser.add_argument("--checkpoint", default="HuggingFaceVLA/smolvla_libero")
     parser.add_argument("--adapter", type=Path, default=None)
     parser.add_argument("--mode", choices=("sync", "async"), default="sync")
     parser.add_argument("--flow-steps", type=int, default=10)
     parser.add_argument("--suite", default="libero_spatial")
     parser.add_argument("--task-id", type=int, default=0)
+    parser.add_argument(
+        "--protocol",
+        type=Path,
+        default=None,
+        help="TOML protocol file; formal episode seeds and shared contracts are recorded in the result",
+    )
     parser.add_argument(
         "--dataset-task-index",
         type=int,
@@ -78,6 +92,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--rtc-max-guidance-weight", type=float, default=10.0)
     parser.add_argument("--rtc-schedule", choices=("linear", "exp"), default="exp")
     parser.add_argument("--gripper-polarity", choices=("positive_open", "negative_open"), default="positive_open")
+    parser.add_argument(
+        "--normalization",
+        default="policy_checkpoint_pre_postprocessor",
+        help="normalization contract recorded in the result; all variants must use checkpoint processors",
+    )
     parser.add_argument(
         "--output",
         type=Path,
@@ -132,72 +151,235 @@ def _configure_libero(assets_dir: Path | None) -> tuple[Path, Path]:
     return package_root, selected_assets
 
 
-def _load_policy(args: argparse.Namespace):
+def _resolve_checkpoint(checkpoint: str) -> Path:
     from huggingface_hub import hf_hub_download
-    from lerobot.configs import RTCAttentionSchedule
+
+    path = Path(checkpoint).expanduser()
+    if path.is_dir():
+        return path
+    config_file = Path(hf_hub_download(checkpoint, "config.json", local_files_only=True))
+    return config_file.parent
+
+
+def _feature_action_dim(config: Any) -> int:
+    """Read an action dimension from the different LeRobot config versions."""
+
+    candidates = []
+    action_feature = getattr(config, "action_feature", None)
+    if action_feature is not None:
+        candidates.append(action_feature)
+    output_features = getattr(config, "output_features", None)
+    if isinstance(output_features, dict):
+        candidates.extend(
+            value for key, value in output_features.items() if str(key).lower() in {"action", "actions"}
+        )
+        candidates.extend(output_features.values())
+    for feature in candidates:
+        shape = getattr(feature, "shape", None)
+        if shape is None and isinstance(feature, dict):
+            shape = feature.get("shape")
+        if shape:
+            return int(shape[-1])
+    return 7
+
+
+def _configure_policy_temporal_contract(
+    config: Any,
+    *,
+    policy_type: str,
+    action_execution_steps: int,
+) -> tuple[int, int | None]:
+    """Lock a checkpoint's executed action prefix to the evaluation protocol."""
+
+    if action_execution_steps < 1:
+        raise ValueError("action_execution_steps must be positive")
+    if policy_type == "smolvla":
+        config.n_action_steps = action_execution_steps
+    else:
+        checkpoint_n_action_steps = getattr(config, "n_action_steps", None)
+        if checkpoint_n_action_steps is None:
+            raise RuntimeError(f"{policy_type} checkpoint is missing n_action_steps")
+        if int(checkpoint_n_action_steps) != action_execution_steps:
+            raise RuntimeError(
+                f"{policy_type} checkpoint n_action_steps {int(checkpoint_n_action_steps)} "
+                f"does not match protocol {action_execution_steps}"
+            )
+
+    policy_n_action_steps = int(config.n_action_steps)
+    raw_n_obs_steps = getattr(config, "n_obs_steps", None)
+    policy_n_obs_steps = int(raw_n_obs_steps) if raw_n_obs_steps is not None else None
+    return policy_n_action_steps, policy_n_obs_steps
+
+
+class PolicyLoadResult:
+    """Loaded policy plus explicit temporal-contract metadata.
+
+    Iteration intentionally yields the historical seven values so existing
+    offline evaluators that unpack ``_load_policy`` remain compatible.
+    """
+
+    __slots__ = (
+        "policy",
+        "preprocessor",
+        "postprocessor",
+        "checkpoint_path",
+        "adapter_parameter_count",
+        "chunk_size",
+        "action_dim",
+        "policy_n_action_steps",
+        "policy_n_obs_steps",
+    )
+
+    def __init__(
+        self,
+        *,
+        policy: Any,
+        preprocessor: Any,
+        postprocessor: Any,
+        checkpoint_path: Path,
+        adapter_parameter_count: int,
+        chunk_size: int,
+        action_dim: int,
+        policy_n_action_steps: int,
+        policy_n_obs_steps: int | None,
+    ) -> None:
+        self.policy = policy
+        self.preprocessor = preprocessor
+        self.postprocessor = postprocessor
+        self.checkpoint_path = checkpoint_path
+        self.adapter_parameter_count = adapter_parameter_count
+        self.chunk_size = chunk_size
+        self.action_dim = action_dim
+        self.policy_n_action_steps = policy_n_action_steps
+        self.policy_n_obs_steps = policy_n_obs_steps
+
+    def __iter__(self) -> Iterator[Any]:
+        yield self.policy
+        yield self.preprocessor
+        yield self.postprocessor
+        yield self.checkpoint_path
+        yield self.adapter_parameter_count
+        yield self.chunk_size
+        yield self.action_dim
+
+
+def _load_policy(
+    args: argparse.Namespace,
+    action_execution_steps: int = 10,
+) -> PolicyLoadResult:
     from lerobot.policies import make_pre_post_processors
-    from lerobot.policies.rtc import RTCConfig
-    from lerobot.policies.smolvla.configuration_smolvla import SmolVLAConfig
-    from lerobot.policies.smolvla.modeling_smolvla import SmolVLAPolicy
 
     if args.flow_steps < 1:
         raise ValueError("flow-steps must be positive")
     if args.device.startswith("cuda") and not torch.cuda.is_available():
         raise RuntimeError("CUDA is required for this rollout on the configured device")
+    if args.adapter is not None and args.policy_type != "smolvla":
+        raise ValueError("--adapter is only supported for --policy-type smolvla")
 
-    checkpoint = Path(args.checkpoint).expanduser()
-    if checkpoint.is_dir():
-        checkpoint_path = checkpoint
-    else:
-        config_file = Path(hf_hub_download(args.checkpoint, "config.json", local_files_only=True))
-        checkpoint_path = config_file.parent
-
-    config = SmolVLAConfig.from_pretrained(checkpoint_path, local_files_only=True)
-    config.device = args.device
-    config.load_vlm_weights = False
-    config.compile_model = False
-    config.num_steps = args.flow_steps
-    if args.mode == "async" and not args.disable_rtc:
-        rtc_schedule = (
-            RTCAttentionSchedule.LINEAR if args.rtc_schedule == "linear" else RTCAttentionSchedule.EXP
-        )
-        config.rtc_config = RTCConfig(
-            enabled=True,
-            execution_horizon=10,
-            max_guidance_weight=args.rtc_max_guidance_weight,
-            prefix_attention_schedule=rtc_schedule,
-        )
-    else:
-        config.rtc_config = None
-
-    policy = SmolVLAPolicy.from_pretrained(
-        checkpoint_path,
-        config=config,
-        local_files_only=True,
-        strict=True,
-    )
-    policy.config.num_steps = args.flow_steps
-    policy.model.config.num_steps = args.flow_steps
-
-    contract = (
-        int(policy.config.chunk_size),
-        int(policy.config.max_action_dim),
-        int(policy.config.action_feature.shape[0]),
-    )
-    if contract != (50, 32, 7):
-        raise RuntimeError(f"expected SmolVLA action contract (50, 32, 7), got {contract}")
-
+    checkpoint_path = _resolve_checkpoint(args.checkpoint)
     adapter_count = 0
-    if args.adapter is not None:
-        adapter = torch.load(args.adapter, map_location="cpu", weights_only=True)
-        state = policy.state_dict()
-        unknown = sorted(set(adapter) - set(state))
-        if unknown:
-            raise RuntimeError(f"adapter keys are absent from policy: {unknown[:3]}")
-        for name, value in adapter.items():
-            state[name] = value.to(device=args.device)
-            adapter_count += int(value.numel())
-        policy.load_state_dict(state, strict=True)
+
+    if args.policy_type == "smolvla":
+        from lerobot.configs import RTCAttentionSchedule
+        from lerobot.policies.rtc import RTCConfig
+        from lerobot.policies.smolvla.configuration_smolvla import SmolVLAConfig
+        from lerobot.policies.smolvla.modeling_smolvla import SmolVLAPolicy
+
+        config = SmolVLAConfig.from_pretrained(checkpoint_path, local_files_only=True)
+        config.device = args.device
+        config.load_vlm_weights = False
+        config.compile_model = False
+        config.num_steps = args.flow_steps
+        policy_n_action_steps, policy_n_obs_steps = _configure_policy_temporal_contract(
+            config,
+            policy_type=args.policy_type,
+            action_execution_steps=action_execution_steps,
+        )
+        if args.mode == "async" and not args.disable_rtc:
+            rtc_schedule = (
+                RTCAttentionSchedule.LINEAR if args.rtc_schedule == "linear" else RTCAttentionSchedule.EXP
+            )
+            config.rtc_config = RTCConfig(
+                enabled=True,
+                execution_horizon=action_execution_steps,
+                max_guidance_weight=args.rtc_max_guidance_weight,
+                prefix_attention_schedule=rtc_schedule,
+            )
+        else:
+            config.rtc_config = None
+
+        policy = SmolVLAPolicy.from_pretrained(
+            checkpoint_path,
+            config=config,
+            local_files_only=True,
+            strict=True,
+        )
+        policy.config.num_steps = args.flow_steps
+        policy.model.config.num_steps = args.flow_steps
+        contract = (
+            int(policy.config.chunk_size),
+            int(policy.config.max_action_dim),
+            int(policy.config.action_feature.shape[0]),
+        )
+        if contract != (50, 32, 7):
+            raise RuntimeError(f"expected SmolVLA action contract (50, 32, 7), got {contract}")
+
+        if args.adapter is not None:
+            adapter = torch.load(args.adapter, map_location="cpu", weights_only=True)
+            state = policy.state_dict()
+            unknown = sorted(set(adapter) - set(state))
+            if unknown:
+                raise RuntimeError(f"adapter keys are absent from policy: {unknown[:3]}")
+            for name, value in adapter.items():
+                state[name] = value.to(device=args.device)
+                adapter_count += int(value.numel())
+            policy.load_state_dict(state, strict=True)
+        chunk_size = contract[0]
+        action_dim = contract[2]
+    elif args.policy_type == "act":
+        from lerobot.policies.act.configuration_act import ACTConfig
+        from lerobot.policies.act.modeling_act import ACTPolicy
+
+        config = ACTConfig.from_pretrained(checkpoint_path, local_files_only=True)
+        config.device = args.device
+        policy_n_action_steps, policy_n_obs_steps = _configure_policy_temporal_contract(
+            config,
+            policy_type=args.policy_type,
+            action_execution_steps=action_execution_steps,
+        )
+        policy = ACTPolicy.from_pretrained(
+            checkpoint_path,
+            config=config,
+            local_files_only=True,
+        )
+        chunk_size = int(getattr(config, "chunk_size", 50))
+        action_dim = _feature_action_dim(config)
+    else:
+        from lerobot.policies.diffusion.configuration_diffusion import DiffusionConfig
+        from lerobot.policies.diffusion.modeling_diffusion import DiffusionPolicy
+
+        config = DiffusionConfig.from_pretrained(checkpoint_path, local_files_only=True)
+        config.device = args.device
+        policy_n_action_steps, policy_n_obs_steps = _configure_policy_temporal_contract(
+            config,
+            policy_type=args.policy_type,
+            action_execution_steps=action_execution_steps,
+        )
+        policy = DiffusionPolicy.from_pretrained(
+            checkpoint_path,
+            config=config,
+            local_files_only=True,
+        )
+        chunk_size = int(getattr(config, "horizon", 64))
+        action_dim = _feature_action_dim(config)
+
+    if action_dim != 7:
+        raise RuntimeError(f"{args.policy_type} checkpoint action dimension must be 7, got {action_dim}")
+    if chunk_size < action_execution_steps:
+        raise RuntimeError(
+            f"{args.policy_type} checkpoint chunk/horizon must be at least "
+            f"{action_execution_steps}, got {chunk_size}"
+        )
 
     preprocessor, postprocessor = make_pre_post_processors(
         config,
@@ -205,7 +387,17 @@ def _load_policy(args: argparse.Namespace):
         preprocessor_overrides={"device_processor": {"device": args.device}},
         postprocessor_overrides={"device_processor": {"device": args.device}},
     )
-    return policy, preprocessor, postprocessor, checkpoint_path, adapter_count
+    return PolicyLoadResult(
+        policy=policy,
+        preprocessor=preprocessor,
+        postprocessor=postprocessor,
+        checkpoint_path=checkpoint_path,
+        adapter_parameter_count=adapter_count,
+        chunk_size=chunk_size,
+        action_dim=action_dim,
+        policy_n_action_steps=policy_n_action_steps,
+        policy_n_obs_steps=policy_n_obs_steps,
+    )
 
 
 def _make_observation_pipeline(task: str):
@@ -352,7 +544,13 @@ def _sleep_for_remaining_period(
     return max(0.0, clock() - sleep_started)
 
 
-def _make_env(suite, args: argparse.Namespace, task_id: int, episode_index: int):
+def _make_env(
+    suite,
+    args: argparse.Namespace,
+    task_id: int,
+    episode_index: int,
+    camera_names: tuple[str, ...],
+):
     from lerobot.envs.libero import LiberoEnv
 
     return LiberoEnv(
@@ -360,7 +558,7 @@ def _make_env(suite, args: argparse.Namespace, task_id: int, episode_index: int)
         task_id=task_id,
         task_suite_name=args.suite,
         episode_length=args.max_steps,
-        camera_name="agentview_image,robot0_eye_in_hand_image",
+        camera_name=",".join(camera_names),
         obs_type="pixels_agent_pos",
         render_mode="rgb_array",
         observation_width=args.observation_width,
@@ -383,6 +581,7 @@ def _run_sync_episode(
     max_steps: int,
     gripper_polarity: str,
     torch_seed: int | None,
+    sim_control_frequency_hz: float = 20.0,
 ) -> dict[str, Any]:
     if torch_seed is not None:
         seed_policy_rng(torch_seed)
@@ -416,6 +615,7 @@ def _run_sync_episode(
             break
 
     elapsed = time.perf_counter() - started
+    wall_throughput_hz = len(actions) / elapsed if elapsed > 0 else None
     return {
         "mode": "sync",
         "seed": seed,
@@ -423,7 +623,9 @@ def _run_sync_episode(
         "steps": len(actions),
         "reward_sum": reward_sum,
         "elapsed_seconds": elapsed,
-        "effective_control_hz": len(actions) / elapsed if elapsed > 0 else None,
+        "effective_control_hz": wall_throughput_hz,
+        "sim_control_frequency_hz": sim_control_frequency_hz,
+        "wall_throughput_hz": wall_throughput_hz,
         "waiting_ticks": 0,
         "held_action_ticks": 0,
         "initial_warmup_seconds": None,
@@ -450,13 +652,14 @@ def _run_async_episode(
     rtc_enabled: bool,
     rtc_use_prefix: bool,
     torch_seed: int | None,
+    sim_control_frequency_hz: float = 20.0,
 ) -> dict[str, Any]:
     if torch_seed is not None:
         seed_policy_rng(torch_seed)
     policy.reset()
     raw_observation, _ = env.reset(seed=seed)
     runtime_config = AsyncRuntimeConfig(
-        control_frequency_hz=20.0,
+        control_frequency_hz=sim_control_frequency_hz,
         chunk_size=50,
         execute_steps=10,
         overlap_steps=overlap_steps,
@@ -553,6 +756,7 @@ def _run_async_episode(
     elapsed = time.perf_counter() - started
     control_elapsed = control_ended - started
     inference_seconds = [float(event["elapsed_seconds"]) for event in events if event.get("error") is None]
+    wall_throughput_hz = len(actions) / control_elapsed if control_elapsed > 0 else None
     return {
         "mode": "async",
         "seed": seed,
@@ -562,7 +766,9 @@ def _run_async_episode(
         "elapsed_seconds": elapsed,
         "control_elapsed_seconds": control_elapsed,
         "finalization_seconds": finalization_seconds,
-        "effective_control_hz": len(actions) / control_elapsed if control_elapsed > 0 else None,
+        "effective_control_hz": wall_throughput_hz,
+        "sim_control_frequency_hz": sim_control_frequency_hz,
+        "wall_throughput_hz": wall_throughput_hz,
         "waiting_ticks": waiting_ticks,
         "held_action_ticks": held_action_ticks,
         "initial_warmup_seconds": warmup_seconds,
@@ -593,7 +799,7 @@ def _run_async_episode(
 
 def _aggregate(episodes: list[dict[str, Any]]) -> dict[str, Any]:
     successes = [bool(item["success"]) for item in episodes]
-    return {
+    result = {
         "episode_count": len(episodes),
         "success_count": sum(successes),
         "success_rate": float(sum(successes) / len(successes)) if successes else None,
@@ -615,7 +821,42 @@ def _aggregate(episodes: list[dict[str, Any]]) -> dict[str, Any]:
         )
         if any(item["effective_control_hz"] is not None for item in episodes)
         else None,
+        "mean_wall_throughput_hz": float(
+            statistics.fmean(
+                item.get("wall_throughput_hz", item.get("effective_control_hz"))
+                for item in episodes
+                if item.get("wall_throughput_hz", item.get("effective_control_hz")) is not None
+            )
+        )
+        if any(
+            item.get("wall_throughput_hz", item.get("effective_control_hz")) is not None
+            for item in episodes
+        )
+        else None,
     }
+    result["success_statistics"] = binary_success_summary(successes)
+    return result
+
+
+def _resolve_episode_seeds(
+    *,
+    episodes: int,
+    start_seed: int,
+    formal_episode_seeds: list[int],
+) -> list[int]:
+    """Resolve the exact seed list while preventing partial formal runs."""
+
+    requested = list(range(start_seed, start_seed + episodes))
+    if not formal_episode_seeds:
+        return requested
+    if (episodes, start_seed) == (1, 0):
+        return list(formal_episode_seeds)
+    if requested != formal_episode_seeds:
+        raise ValueError(
+            "episodes/start_seed must select the complete protocol formal episode_seeds list: "
+            f"requested={requested}, formal={formal_episode_seeds}"
+        )
+    return requested
 
 
 def main() -> int:
@@ -623,6 +864,7 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     result: dict[str, Any] = {
         "status": "blocked",
+        "policy_type": args.policy_type,
         "checkpoint": args.checkpoint,
         "adapter": str(args.adapter) if args.adapter is not None else None,
         "mode": args.mode,
@@ -638,6 +880,42 @@ def main() -> int:
     try:
         if args.episodes < 1:
             raise ValueError("episodes must be positive")
+        formal_episode_seeds: list[int] = []
+        if args.protocol is not None:
+            if not args.protocol.exists():
+                raise FileNotFoundError(args.protocol)
+            protocol_document = tomllib.loads(args.protocol.read_text(encoding="utf-8"))
+            protocol = EvaluationProtocol.from_mapping(protocol_document)
+            formal = protocol_document.get("formal", {})
+            if isinstance(formal, dict):
+                raw_seeds = formal.get("episode_seeds", [])
+                if isinstance(raw_seeds, list):
+                    formal_episode_seeds = [int(seed) for seed in raw_seeds]
+        else:
+            protocol = EvaluationProtocol(
+                suite=args.suite,
+                task_id=args.task_id,
+                dataset_task_index=args.dataset_task_index,
+                observation_height=args.observation_height,
+                observation_width=args.observation_width,
+                max_steps=args.max_steps
+                or {"libero_spatial": 280, "libero_object": 280, "libero_goal": 300}.get(args.suite, 500),
+                normalization=args.normalization,
+            )
+        episode_seeds = _resolve_episode_seeds(
+            episodes=args.episodes,
+            start_seed=args.start_seed,
+            formal_episode_seeds=formal_episode_seeds,
+        )
+        if args.suite != protocol.suite:
+            raise ValueError(f"protocol suite mismatch: CLI={args.suite!r}, protocol={protocol.suite!r}")
+        if args.task_id != protocol.task_id:
+            raise ValueError(f"protocol task_id mismatch: CLI={args.task_id}, protocol={protocol.task_id}")
+        if args.dataset_task_index != protocol.dataset_task_index:
+            raise ValueError(
+                "protocol dataset_task_index mismatch: "
+                f"CLI={args.dataset_task_index}, protocol={protocol.dataset_task_index}"
+            )
         package_root, assets_dir = _configure_libero(args.assets_dir)
         from libero.libero import benchmark
         # LeRobot's LIBERO wrapper resolves assets through LIBERO's module cache.
@@ -653,17 +931,50 @@ def main() -> int:
         suite = suite_map[args.suite]()
         task_info = suite.get_task(args.task_id)
         task = args.task or task_info.language or TASK0_LANGUAGE
-        policy, policy_preprocessor, postprocessor, checkpoint_path, adapter_parameter_count = _load_policy(args)
+        loaded_policy = _load_policy(args, protocol.action_execution_steps)
+        (
+            policy,
+            policy_preprocessor,
+            postprocessor,
+            checkpoint_path,
+            adapter_parameter_count,
+            policy_chunk_size,
+            policy_action_dim,
+        ) = loaded_policy
+        policy_n_action_steps = loaded_policy.policy_n_action_steps
+        policy_n_obs_steps = loaded_policy.policy_n_obs_steps
+        if policy_action_dim != protocol.action_dim:
+            raise RuntimeError(
+                f"policy action dimension {policy_action_dim} does not match protocol {protocol.action_dim}"
+            )
+        if policy_chunk_size < protocol.action_execution_steps:
+            raise RuntimeError(
+                f"policy chunk/horizon {policy_chunk_size} is shorter than protocol execution horizon "
+                f"{protocol.action_execution_steps}"
+            )
         prepare_observation = _make_observation_pipeline(task)
-        max_steps = args.max_steps or {"libero_spatial": 280, "libero_object": 280, "libero_goal": 300}.get(args.suite, 500)
-        tick_sleep = 1.0 / 20.0 if args.tick_sleep is None and args.mode == "async" else float(args.tick_sleep or 0.0)
+        max_steps = protocol.max_steps
+        tick_sleep = (
+            1.0 / protocol.control_frequency_hz
+            if args.tick_sleep is None and args.mode == "async"
+            else float(args.tick_sleep or 0.0)
+        )
+
+        # RTC guidance is currently implemented by SmolVLA.  ACT and
+        # Diffusion Policy still use the same ActionQueue, trigger, and
+        # overlap path, while their LeRobot chunk methods receive no RTC
+        # keyword arguments.  The result records this distinction.
+        rtc_enabled = (
+            args.mode == "async"
+            and not args.disable_rtc
+            and args.policy_type == "smolvla"
+        )
 
         episode_results = []
-        for offset in range(args.episodes):
-            seed = args.start_seed + offset
+        for seed in episode_seeds:
             if args.torch_seed is not None:
                 seed_policy_rng(args.torch_seed)
-            env = _make_env(suite, args, args.task_id, seed)
+            env = _make_env(suite, args, args.task_id, seed, protocol.camera_names)
             try:
                 if args.mode == "sync":
                     episode = _run_sync_episode(
@@ -677,6 +988,7 @@ def main() -> int:
                         max_steps,
                         args.gripper_polarity,
                         args.torch_seed,
+                        protocol.control_frequency_hz,
                     )
                 else:
                     episode = _run_async_episode(
@@ -692,9 +1004,10 @@ def main() -> int:
                         args.gripper_polarity,
                         args.overlap_steps,
                         args.prefetch_threshold,
-                        not args.disable_rtc,
+                        rtc_enabled,
                         not args.disable_rtc_prefix,
                         args.torch_seed,
+                        protocol.control_frequency_hz,
                     )
                 episode["torch_seed"] = args.torch_seed
                 episode["task_id"] = args.task_id
@@ -707,11 +1020,31 @@ def main() -> int:
         result.update(
             {
                 "status": "completed",
+                "protocol_path": str(args.protocol) if args.protocol is not None else None,
+                "evaluation_protocol": protocol.to_dict(),
+                "formal_episode_seeds": formal_episode_seeds,
+                "episode_seeds": episode_seeds,
                 "package_root": str(package_root),
                 "assets_dir": str(assets_dir),
                 "checkpoint_path": str(checkpoint_path),
                 "task": task,
                 "adapter_parameter_count": adapter_parameter_count,
+                "policy_chunk_size": policy_chunk_size,
+                "policy_action_dim": policy_action_dim,
+                "policy_n_action_steps": policy_n_action_steps,
+                "policy_n_obs_steps": policy_n_obs_steps,
+                "runtime_contract": {
+                    "camera_names": list(protocol.camera_names),
+                    "state_dim": protocol.state_dim,
+                    "action_dim": protocol.action_dim,
+                    "action_execution_steps": protocol.action_execution_steps,
+                    "policy_n_action_steps": policy_n_action_steps,
+                    "policy_n_obs_steps": policy_n_obs_steps,
+                    "sim_control_frequency_hz": protocol.control_frequency_hz,
+                    "normalization": protocol.normalization,
+                    "rtc_supported": args.policy_type == "smolvla",
+                    "rtc_enabled": rtc_enabled,
+                },
                 "episodes": episode_results,
                 "aggregate": _aggregate(episode_results),
             }

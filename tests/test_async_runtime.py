@@ -4,6 +4,56 @@ import time
 import pytest
 import torch
 
+from smolvla_flow.async_runtime import PreprocessedPolicyAdapter
+
+
+def test_preprocessed_policy_adapter_supports_non_rtc_chunk_policies() -> None:
+    class Policy:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def predict_action_chunk(self, batch):
+            self.calls += 1
+            assert batch == {"state": 1}
+            return torch.ones(1, 10, 7)
+
+    policy = Policy()
+    adapter = PreprocessedPolicyAdapter(policy, lambda value: value)
+    output = adapter(
+        {"state": 1},
+        prev_chunk_left_over=None,
+        inference_delay=2,
+        execution_horizon=10,
+    )
+    assert output.shape == (1, 10, 7)
+    assert policy.calls == 1
+
+
+def test_preprocessed_policy_adapter_passes_rtc_keywords_when_supported() -> None:
+    class Policy:
+        def __init__(self) -> None:
+            self.received = None
+
+        def predict_action_chunk(self, batch, **kwargs):
+            self.received = kwargs
+            return torch.zeros(1, 10, 7)
+
+    policy = Policy()
+    adapter = PreprocessedPolicyAdapter(policy, lambda value: value)
+    adapter(
+        {"state": 1},
+        prev_chunk_left_over=torch.ones(1, 10, 7),
+        inference_delay=3,
+        execution_horizon=10,
+    )
+    assert policy.received is not None
+    torch.testing.assert_close(
+        policy.received["prev_chunk_left_over"],
+        torch.ones(1, 10, 7),
+    )
+    assert policy.received["inference_delay"] == 3
+    assert policy.received["execution_horizon"] == 10
+
 from smolvla_flow.async_runtime import (
     ActionQueue,
     AsyncClosedLoopController,

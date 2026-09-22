@@ -1,0 +1,1160 @@
+{
+  "models": {
+    "smolvla_official": {
+      "trials": 400,
+      "expected": 400,
+      "complete": true,
+      "suites": {
+        "libero_spatial": {
+          "trials": 100,
+          "successes": 72,
+          "success_rate": 0.72
+        },
+        "libero_object": {
+          "trials": 100,
+          "successes": 90,
+          "success_rate": 0.9
+        },
+        "libero_goal": {
+          "trials": 100,
+          "successes": 79,
+          "success_rate": 0.79
+        },
+        "libero_10": {
+          "trials": 100,
+          "successes": 34,
+          "success_rate": 0.34
+        }
+      },
+      "macro_success_rate": 0.6875,
+      "wall_tick_per_s": 3.0299110640661207,
+      "success_per_hour_including_reset": 33.141467056453294,
+      "prediction_latency": {
+        "mean_ms": 307.9363407134307,
+        "p50_ms": 297.00957983732224,
+        "p95_ms": 410.81415116786957,
+        "count": 88012
+      },
+      "select_latency": {
+        "mean_ms": 311.5273304875351,
+        "p50_ms": 300.41046999394894,
+        "p95_ms": 415.8322140574455,
+        "count": 88012
+      },
+      "peak_vram_bytes": 1580504064
+    },
+    "act_public": {
+      "trials": 400,
+      "expected": 400,
+      "complete": true,
+      "suites": {
+        "libero_spatial": {
+          "trials": 100,
+          "successes": 25,
+          "success_rate": 0.25
+        },
+        "libero_object": {
+          "trials": 100,
+          "successes": 11,
+          "success_rate": 0.11
+        },
+        "libero_goal": {
+          "trials": 100,
+          "successes": 3,
+          "success_rate": 0.03
+        },
+        "libero_10": {
+          "trials": 100,
+          "successes": 14,
+          "success_rate": 0.14
+        }
+      },
+      "macro_success_rate": 0.1325,
+      "wall_tick_per_s": 51.31470952958351,
+      "success_per_hour_including_reset": 60.82519387170125,
+      "prediction_latency": {
+        "mean_ms": 8.640227344050434,
+        "p50_ms": 9.503116831183434,
+        "p95_ms": 10.627921670675278,
+        "count": 1414
+      },
+      "select_latency": {
+        "mean_ms": 0.6102452338077264,
+        "p50_ms": 0.5448423326015472,
+        "p95_ms": 0.6645917892456055,
+        "count": 123505
+      },
+      "peak_vram_bytes": 230387712
+    }
+  },
+  "tasks": [
+    {
+      "model": "smolvla_official",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "trials": 10,
+      "successes": 4,
+      "success_rate": 0.4,
+      "wilson_95": [
+        0.16818032970623614,
+        0.6873262302663417
+      ],
+      "timeouts": 6
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_spatial",
+      "task_id": 1,
+      "trials": 10,
+      "successes": 10,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.7224672001371107,
+        0.9999999999999999
+      ],
+      "timeouts": 0
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_spatial",
+      "task_id": 2,
+      "trials": 10,
+      "successes": 9,
+      "success_rate": 0.9,
+      "wilson_95": [
+        0.5958499732047615,
+        0.9821237869049271
+      ],
+      "timeouts": 1
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_spatial",
+      "task_id": 3,
+      "trials": 10,
+      "successes": 10,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.7224672001371107,
+        0.9999999999999999
+      ],
+      "timeouts": 0
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_spatial",
+      "task_id": 4,
+      "trials": 10,
+      "successes": 9,
+      "success_rate": 0.9,
+      "wilson_95": [
+        0.5958499732047615,
+        0.9821237869049271
+      ],
+      "timeouts": 1
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "trials": 10,
+      "successes": 1,
+      "success_rate": 0.1,
+      "wilson_95": [
+        0.017876213095072896,
+        0.4041500267952385
+      ],
+      "timeouts": 9
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_spatial",
+      "task_id": 6,
+      "trials": 10,
+      "successes": 8,
+      "success_rate": 0.8,
+      "wilson_95": [
+        0.49016247153664183,
+        0.9433178485456247
+      ],
+      "timeouts": 2
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_spatial",
+      "task_id": 7,
+      "trials": 10,
+      "successes": 10,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.7224672001371107,
+        0.9999999999999999
+      ],
+      "timeouts": 0
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_spatial",
+      "task_id": 8,
+      "trials": 10,
+      "successes": 7,
+      "success_rate": 0.7,
+      "wilson_95": [
+        0.39677814746114537,
+        0.8922087325936989
+      ],
+      "timeouts": 3
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_spatial",
+      "task_id": 9,
+      "trials": 10,
+      "successes": 4,
+      "success_rate": 0.4,
+      "wilson_95": [
+        0.16818032970623614,
+        0.6873262302663417
+      ],
+      "timeouts": 6
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_object",
+      "task_id": 0,
+      "trials": 10,
+      "successes": 7,
+      "success_rate": 0.7,
+      "wilson_95": [
+        0.39677814746114537,
+        0.8922087325936989
+      ],
+      "timeouts": 3
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_object",
+      "task_id": 1,
+      "trials": 10,
+      "successes": 9,
+      "success_rate": 0.9,
+      "wilson_95": [
+        0.5958499732047615,
+        0.9821237869049271
+      ],
+      "timeouts": 1
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_object",
+      "task_id": 2,
+      "trials": 10,
+      "successes": 10,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.7224672001371107,
+        0.9999999999999999
+      ],
+      "timeouts": 0
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_object",
+      "task_id": 3,
+      "trials": 10,
+      "successes": 9,
+      "success_rate": 0.9,
+      "wilson_95": [
+        0.5958499732047615,
+        0.9821237869049271
+      ],
+      "timeouts": 1
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_object",
+      "task_id": 4,
+      "trials": 10,
+      "successes": 9,
+      "success_rate": 0.9,
+      "wilson_95": [
+        0.5958499732047615,
+        0.9821237869049271
+      ],
+      "timeouts": 1
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_object",
+      "task_id": 5,
+      "trials": 10,
+      "successes": 9,
+      "success_rate": 0.9,
+      "wilson_95": [
+        0.5958499732047615,
+        0.9821237869049271
+      ],
+      "timeouts": 1
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_object",
+      "task_id": 6,
+      "trials": 10,
+      "successes": 10,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.7224672001371107,
+        0.9999999999999999
+      ],
+      "timeouts": 0
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_object",
+      "task_id": 7,
+      "trials": 10,
+      "successes": 9,
+      "success_rate": 0.9,
+      "wilson_95": [
+        0.5958499732047615,
+        0.9821237869049271
+      ],
+      "timeouts": 1
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_object",
+      "task_id": 8,
+      "trials": 10,
+      "successes": 10,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.7224672001371107,
+        0.9999999999999999
+      ],
+      "timeouts": 0
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_object",
+      "task_id": 9,
+      "trials": 10,
+      "successes": 8,
+      "success_rate": 0.8,
+      "wilson_95": [
+        0.49016247153664183,
+        0.9433178485456247
+      ],
+      "timeouts": 2
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "trials": 10,
+      "successes": 4,
+      "success_rate": 0.4,
+      "wilson_95": [
+        0.16818032970623614,
+        0.6873262302663417
+      ],
+      "timeouts": 6
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_goal",
+      "task_id": 1,
+      "trials": 10,
+      "successes": 10,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.7224672001371107,
+        0.9999999999999999
+      ],
+      "timeouts": 0
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_goal",
+      "task_id": 2,
+      "trials": 10,
+      "successes": 9,
+      "success_rate": 0.9,
+      "wilson_95": [
+        0.5958499732047615,
+        0.9821237869049271
+      ],
+      "timeouts": 1
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_goal",
+      "task_id": 3,
+      "trials": 10,
+      "successes": 2,
+      "success_rate": 0.2,
+      "wilson_95": [
+        0.05668215145437519,
+        0.5098375284633583
+      ],
+      "timeouts": 8
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_goal",
+      "task_id": 4,
+      "trials": 10,
+      "successes": 9,
+      "success_rate": 0.9,
+      "wilson_95": [
+        0.5958499732047615,
+        0.9821237869049271
+      ],
+      "timeouts": 1
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "trials": 10,
+      "successes": 8,
+      "success_rate": 0.8,
+      "wilson_95": [
+        0.49016247153664183,
+        0.9433178485456247
+      ],
+      "timeouts": 2
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_goal",
+      "task_id": 6,
+      "trials": 10,
+      "successes": 9,
+      "success_rate": 0.9,
+      "wilson_95": [
+        0.5958499732047615,
+        0.9821237869049271
+      ],
+      "timeouts": 1
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_goal",
+      "task_id": 7,
+      "trials": 10,
+      "successes": 10,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.7224672001371107,
+        0.9999999999999999
+      ],
+      "timeouts": 0
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_goal",
+      "task_id": 8,
+      "trials": 10,
+      "successes": 10,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.7224672001371107,
+        0.9999999999999999
+      ],
+      "timeouts": 0
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_goal",
+      "task_id": 9,
+      "trials": 10,
+      "successes": 8,
+      "success_rate": 0.8,
+      "wilson_95": [
+        0.49016247153664183,
+        0.9433178485456247
+      ],
+      "timeouts": 2
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_10",
+      "task_id": 0,
+      "trials": 10,
+      "successes": 1,
+      "success_rate": 0.1,
+      "wilson_95": [
+        0.017876213095072896,
+        0.4041500267952385
+      ],
+      "timeouts": 9
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_10",
+      "task_id": 1,
+      "trials": 10,
+      "successes": 2,
+      "success_rate": 0.2,
+      "wilson_95": [
+        0.05668215145437519,
+        0.5098375284633583
+      ],
+      "timeouts": 8
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_10",
+      "task_id": 2,
+      "trials": 10,
+      "successes": 1,
+      "success_rate": 0.1,
+      "wilson_95": [
+        0.017876213095072896,
+        0.4041500267952385
+      ],
+      "timeouts": 9
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_10",
+      "task_id": 3,
+      "trials": 10,
+      "successes": 9,
+      "success_rate": 0.9,
+      "wilson_95": [
+        0.5958499732047615,
+        0.9821237869049271
+      ],
+      "timeouts": 1
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_10",
+      "task_id": 4,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_10",
+      "task_id": 5,
+      "trials": 10,
+      "successes": 8,
+      "success_rate": 0.8,
+      "wilson_95": [
+        0.49016247153664183,
+        0.9433178485456247
+      ],
+      "timeouts": 2
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_10",
+      "task_id": 6,
+      "trials": 10,
+      "successes": 8,
+      "success_rate": 0.8,
+      "wilson_95": [
+        0.49016247153664183,
+        0.9433178485456247
+      ],
+      "timeouts": 2
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_10",
+      "task_id": 7,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_10",
+      "task_id": 8,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "smolvla_official",
+      "suite": "libero_10",
+      "task_id": 9,
+      "trials": 10,
+      "successes": 5,
+      "success_rate": 0.5,
+      "wilson_95": [
+        0.236593090512564,
+        0.7634069094874361
+      ],
+      "timeouts": 5
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "trials": 10,
+      "successes": 2,
+      "success_rate": 0.2,
+      "wilson_95": [
+        0.05668215145437519,
+        0.5098375284633583
+      ],
+      "timeouts": 8
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_spatial",
+      "task_id": 1,
+      "trials": 10,
+      "successes": 5,
+      "success_rate": 0.5,
+      "wilson_95": [
+        0.236593090512564,
+        0.7634069094874361
+      ],
+      "timeouts": 5
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_spatial",
+      "task_id": 2,
+      "trials": 10,
+      "successes": 2,
+      "success_rate": 0.2,
+      "wilson_95": [
+        0.05668215145437519,
+        0.5098375284633583
+      ],
+      "timeouts": 8
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_spatial",
+      "task_id": 3,
+      "trials": 10,
+      "successes": 5,
+      "success_rate": 0.5,
+      "wilson_95": [
+        0.236593090512564,
+        0.7634069094874361
+      ],
+      "timeouts": 5
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_spatial",
+      "task_id": 4,
+      "trials": 10,
+      "successes": 2,
+      "success_rate": 0.2,
+      "wilson_95": [
+        0.05668215145437519,
+        0.5098375284633583
+      ],
+      "timeouts": 8
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_spatial",
+      "task_id": 5,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_spatial",
+      "task_id": 6,
+      "trials": 10,
+      "successes": 7,
+      "success_rate": 0.7,
+      "wilson_95": [
+        0.39677814746114537,
+        0.8922087325936989
+      ],
+      "timeouts": 3
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_spatial",
+      "task_id": 7,
+      "trials": 10,
+      "successes": 1,
+      "success_rate": 0.1,
+      "wilson_95": [
+        0.017876213095072896,
+        0.4041500267952385
+      ],
+      "timeouts": 9
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_spatial",
+      "task_id": 8,
+      "trials": 10,
+      "successes": 1,
+      "success_rate": 0.1,
+      "wilson_95": [
+        0.017876213095072896,
+        0.4041500267952385
+      ],
+      "timeouts": 9
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_spatial",
+      "task_id": 9,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_object",
+      "task_id": 0,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_object",
+      "task_id": 1,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_object",
+      "task_id": 2,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_object",
+      "task_id": 3,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_object",
+      "task_id": 4,
+      "trials": 10,
+      "successes": 2,
+      "success_rate": 0.2,
+      "wilson_95": [
+        0.05668215145437519,
+        0.5098375284633583
+      ],
+      "timeouts": 8
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_object",
+      "task_id": 5,
+      "trials": 10,
+      "successes": 3,
+      "success_rate": 0.3,
+      "wilson_95": [
+        0.10779126740630099,
+        0.6032218525388546
+      ],
+      "timeouts": 7
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_object",
+      "task_id": 6,
+      "trials": 10,
+      "successes": 2,
+      "success_rate": 0.2,
+      "wilson_95": [
+        0.05668215145437519,
+        0.5098375284633583
+      ],
+      "timeouts": 8
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_object",
+      "task_id": 7,
+      "trials": 10,
+      "successes": 1,
+      "success_rate": 0.1,
+      "wilson_95": [
+        0.017876213095072896,
+        0.4041500267952385
+      ],
+      "timeouts": 9
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_object",
+      "task_id": 8,
+      "trials": 10,
+      "successes": 2,
+      "success_rate": 0.2,
+      "wilson_95": [
+        0.05668215145437519,
+        0.5098375284633583
+      ],
+      "timeouts": 8
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_object",
+      "task_id": 9,
+      "trials": 10,
+      "successes": 1,
+      "success_rate": 0.1,
+      "wilson_95": [
+        0.017876213095072896,
+        0.4041500267952385
+      ],
+      "timeouts": 9
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_goal",
+      "task_id": 0,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_goal",
+      "task_id": 1,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_goal",
+      "task_id": 2,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_goal",
+      "task_id": 3,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_goal",
+      "task_id": 4,
+      "trials": 10,
+      "successes": 2,
+      "success_rate": 0.2,
+      "wilson_95": [
+        0.05668215145437519,
+        0.5098375284633583
+      ],
+      "timeouts": 8
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_goal",
+      "task_id": 5,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_goal",
+      "task_id": 6,
+      "trials": 10,
+      "successes": 1,
+      "success_rate": 0.1,
+      "wilson_95": [
+        0.017876213095072896,
+        0.4041500267952385
+      ],
+      "timeouts": 9
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_goal",
+      "task_id": 7,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_goal",
+      "task_id": 8,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_goal",
+      "task_id": 9,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_10",
+      "task_id": 0,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_10",
+      "task_id": 1,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_10",
+      "task_id": 2,
+      "trials": 10,
+      "successes": 4,
+      "success_rate": 0.4,
+      "wilson_95": [
+        0.16818032970623614,
+        0.6873262302663417
+      ],
+      "timeouts": 6
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_10",
+      "task_id": 3,
+      "trials": 10,
+      "successes": 2,
+      "success_rate": 0.2,
+      "wilson_95": [
+        0.05668215145437519,
+        0.5098375284633583
+      ],
+      "timeouts": 8
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_10",
+      "task_id": 4,
+      "trials": 10,
+      "successes": 1,
+      "success_rate": 0.1,
+      "wilson_95": [
+        0.017876213095072896,
+        0.4041500267952385
+      ],
+      "timeouts": 9
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_10",
+      "task_id": 5,
+      "trials": 10,
+      "successes": 3,
+      "success_rate": 0.3,
+      "wilson_95": [
+        0.10779126740630099,
+        0.6032218525388546
+      ],
+      "timeouts": 7
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_10",
+      "task_id": 6,
+      "trials": 10,
+      "successes": 4,
+      "success_rate": 0.4,
+      "wilson_95": [
+        0.16818032970623614,
+        0.6873262302663417
+      ],
+      "timeouts": 6
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_10",
+      "task_id": 7,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_10",
+      "task_id": 8,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    },
+    {
+      "model": "act_public",
+      "suite": "libero_10",
+      "task_id": 9,
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.2775327998628892
+      ],
+      "timeouts": 10
+    }
+  ],
+  "paired": {
+    "models": [
+      "smolvla_official",
+      "act_public"
+    ],
+    "counts": {
+      "both_success": 43,
+      "first_only": 232,
+      "second_only": 10,
+      "both_fail": 115
+    },
+    "first_minus_second": 0.555,
+    "task_bootstrap_95": [
+      0.445,
+      0.655
+    ],
+    "bootstrap_replicates": 10000
+  },
+  "completed_at": {
+    "libero40_public_v1": "2026-09-15T00:19:58.354597+08:00",
+    "libero40_act_v1": "2026-09-15T01:14:40.902524+08:00"
+  },
+  "verification": {
+    "unique_formal_episodes": 800,
+    "same_tasks_states_assets_versions_shared_sources": true,
+    "required_videos_present": true,
+    "pilot_excluded": true
+  }
+}
